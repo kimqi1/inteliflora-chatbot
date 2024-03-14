@@ -291,7 +291,7 @@ function ChatContainer() {
           className="w-auto max-w-[106px] h-full rounded-full border border-white mr-2 bg-white"
           alt="Avatar"
         />
-        <h2 className="text-white text-lg">Ask EZDorms</h2>
+        <h2 className="text-white text-lg">Ask Inteliflora</h2>
       </div>
 
       <div className="flex-1 overflow-y-auto p-4">

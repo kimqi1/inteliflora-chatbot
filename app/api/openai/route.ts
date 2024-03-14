@@ -522,7 +522,7 @@ export async function POST(request: Request) {
       },
       ...clonedMessages,
     ],
-    max_tokens: 1500,
+    // max_tokens: 1500,
   };
   console.log(payload)
 
