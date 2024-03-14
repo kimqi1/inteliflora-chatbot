@@ -520,10 +520,11 @@ export async function POST(request: Request) {
       When to Recommend: Chinese Symptomology	Hectic fever and night sweats, lower back and sore knees, sore throat, insomnia, chronic swelling of the gums, ringing in the ears, and nocturnal seminal emission.
       Western Symptomology	Chronic disease, hypertension, and chronic nephritis.`,
       },
-      clonedMessages,
+      ...clonedMessages,
     ],
-    // max_tokens: 1500,
+    max_tokens: 1500,
   };
+  console.log(payload)
 
   const headers = {
     "Content-Type": "application/json",

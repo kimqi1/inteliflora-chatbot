@@ -143,27 +143,26 @@ function ChatContainer() {
           const textMessage = textContentItem.text;
           console.log(textMessage);
           console.log(messages);
-          const response = await fetch(
-            "/api/openai",
-            {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({
-                messages: [
-                  ...messages,
+          const response = await axios.post("/api/openai", {
+            messages: [
+              {
+                role: "user",
+                content: [
                   {
-                    role: "user",
-                    content: textMessage,
+                    type: "text",
+                    text: textMessage, // Ensure textMessage is defined and contains the message you want to send
                   },
                 ],
-                userName: "not specified",
-              }),
-            }
-          );
-          const result = await response.json();
-          const finalRes = result.translatedText;
+              },
+            ],
+          }, {
+            headers: {
+              "Content-Type": "application/json",
+            },
+          });
+          
+          const result = await response.data;
+          const finalRes = result.message.content;
           console.log(finalRes);
           const newMessage: Message = {
             // Explicitly declaring newMessage as type Message
@@ -184,7 +183,9 @@ function ChatContainer() {
               content: [
                 {
                   type: "text",
-                  text: "Analyze image and try to find the possible disease." + message,
+                  text:
+                    "Analyze image and try to find the possible disease." +
+                    message,
                 },
                 ...imageBase64Strings.map((base64) => ({
                   type: "image_url",
@@ -202,35 +203,31 @@ function ChatContainer() {
         }
 
         const textMessage = { ...response1.data.message };
-        console.log(textMessage);
-        const response = await fetch(
-          "/api/openai",
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              // ...messages,
-              messages: [
-                {
-                  role: "user",
-                  content:
-                    " Recommend products based on that." +
-                    textMessage.content,
-                },
-              ],
-              userName: "not specified",
-            }),
-          }
-        );
-        const result = await response.json();
-        const finalRes = result.translatedText;
-        console.log(finalRes);
+        // console.log(textMessage);
+        // const response = await fetch("/api/openai", {
+        //   method: "POST",
+        //   headers: {
+        //     "Content-Type": "application/json",
+        //   },
+        //   body: JSON.stringify({
+        //     // ...messages,
+        //     messages: [
+        //       {
+        //         role: "user",
+        //         content:
+        //           " Recommend products based on that." + textMessage.content,
+        //       },
+        //     ],
+        //     userName: "not specified",
+        //   }),
+        // });
+        // const result = await response.json();
+        // const finalRes = result.translatedText;
+        // console.log(finalRes);
         const newMessage: Message = {
           // Explicitly declaring newMessage as type Message
           role: "system",
-          content: [{ type: "text", text: finalRes }],
+          content: [{ type: "text", text: textMessage }],
         };
 
         setMessages((prevMessages: Message[]) => [
