@@ -144,7 +144,7 @@ function ChatContainer() {
           console.log(textMessage);
           console.log(messages);
           const response = await fetch(
-            "https://backendtraining-production.up.railway.app/api/chat",
+            "/api/openai",
             {
               method: "POST",
               headers: {
@@ -184,7 +184,7 @@ function ChatContainer() {
               content: [
                 {
                   type: "text",
-                  text: "Answer very shortly" + message,
+                  text: "Analyze image and try to find the possible disease." + message,
                 },
                 ...imageBase64Strings.map((base64) => ({
                   type: "image_url",
@@ -204,7 +204,7 @@ function ChatContainer() {
         const textMessage = { ...response1.data.message };
         console.log(textMessage);
         const response = await fetch(
-          "https://backendtraining-production.up.railway.app/api/chat",
+          "/api/openai",
           {
             method: "POST",
             headers: {
@@ -216,7 +216,7 @@ function ChatContainer() {
                 {
                   role: "user",
                   content:
-                    "Extract products and recommend products" +
+                    " Recommend products based on that." +
                     textMessage.content,
                 },
               ],
