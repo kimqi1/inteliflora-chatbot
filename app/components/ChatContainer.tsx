@@ -13,6 +13,17 @@ import "./d.css";
 import chatbotImg from "./chatbotImg.png";
 import Image from "next/image";
 
+import Question from "../components/Question";
+import Option from "../components/Option";
+import {
+  Reason,
+  SpecificSymptom,
+  ChronicCondition,
+  AgeGroup,
+  SubAgeGroup,
+  Gender,
+} from "../../types";
+
 // Define the structure of a message
 type Message = {
   role: "assistant" | "system" | "user";
@@ -36,7 +47,6 @@ type ImageContent = {
 function ChatContainer() {
   const [images, setImages] = useState<File[]>([]);
   const [message, setMessage] = useState("");
-  // const [messages, setMessages] = useState<Message[]>([]);
 
   const [messages, setMessages] = useState<Message[]>([
     {
@@ -141,26 +151,28 @@ function ChatContainer() {
 
         if (textContentItem && "text" in textContentItem) {
           const textMessage = textContentItem.text;
-          console.log(textMessage);
-          console.log(messages);
-          const response = await axios.post("/api/openai", {
-            messages: [
-              {
-                role: "user",
-                content: [
-                  {
-                    type: "text",
-                    text: textMessage, // Ensure textMessage is defined and contains the message you want to send
-                  },
-                ],
-              },
-            ],
-          }, {
-            headers: {
-              "Content-Type": "application/json",
+          const response = await axios.post(
+            "/api/openai",
+            {
+              messages: [
+                {
+                  role: "user",
+                  content: [
+                    {
+                      type: "text",
+                      text: textMessage, // Ensure textMessage is defined and contains the message you want to send
+                    },
+                  ],
+                },
+              ],
             },
-          });
-          
+            {
+              headers: {
+                "Content-Type": "application/json",
+              },
+            }
+          );
+
           const result = await response.data;
           const finalRes = result.message.content;
           console.log(finalRes);
@@ -203,29 +215,8 @@ function ChatContainer() {
         }
 
         const textMessage = { ...response1.data.message };
-        // console.log(textMessage);
-        // const response = await fetch("/api/openai", {
-        //   method: "POST",
-        //   headers: {
-        //     "Content-Type": "application/json",
-        //   },
-        //   body: JSON.stringify({
-        //     // ...messages,
-        //     messages: [
-        //       {
-        //         role: "user",
-        //         content:
-        //           " Recommend products based on that." + textMessage.content,
-        //       },
-        //     ],
-        //     userName: "not specified",
-        //   }),
-        // });
-        // const result = await response.json();
-        // const finalRes = result.translatedText;
-        // console.log(finalRes);
+
         const newMessage: Message = {
-          // Explicitly declaring newMessage as type Message
           role: "system",
           content: [{ type: "text", text: textMessage }],
         };
@@ -234,7 +225,6 @@ function ChatContainer() {
           ...prevMessages,
           newMessage as Message,
         ]); // Type assertion here
-        // setMessages((prevMessages) => [...prevMessages, newMessage]);
       }
     } catch (error) {
       toast.error("Failed to send message");
@@ -272,27 +262,127 @@ function ChatContainer() {
     return `<pre style="white-space: pre-wrap;">${content}</pre>`;
   }
 
-  // function formatMessage(content: any) {
-  //   const markdownLinkRegex = /\[([^\]]+)]\((http[^)]+)\)/g;
-  //   const formattedContent = content.replace(
-  //     markdownLinkRegex,
-  //     (match: any, text: any, url: any) => {
-  //       return `<a href="${url}" target="_blank" style="text-decoration: none; color: #007bff;">${text}</a>`;
-  //     }
-  //   );
-  //   return `<pre style="white-space: pre-wrap;">${formattedContent}</pre>`;
-  // }
+  // form related questions
+  const [step, setStep] = useState<number>(1);
+  const [reason, setReason] = useState<Reason | "">("");
+  const [specificSymptom, setSpecificSymptom] = useState<SpecificSymptom | "">(
+    ""
+  );
+  const [ageGroup, setAgeGroup] = useState<AgeGroup | "">("");
+  const [subAgeGroup, setSubAgeGroup] = useState<SubAgeGroup | "">("");
+  const [gender, setGender] = useState<Gender | "">("");
+
+  const handleSelectReason = (selectedReason: Reason) => {
+    setReason(selectedReason);
+    // Assuming "Specific Symptoms" needs a follow-up, otherwise skip to the age question
+    const nextStep = selectedReason === "Specific Symptoms" ? 2 : 3;
+    setStep(nextStep);
+  };
+
+  const handleSelectSpecificSymptom = (symptom: SpecificSymptom) => {
+    setSpecificSymptom(symptom);
+    setStep(3); 
+  };
+
+  const handleSelectAgeGroup = (age: AgeGroup) => {
+    setAgeGroup(age);
+    if (age === "Under 18") {
+      setStep(4);
+    } else {
+      setStep(5); 
+    }
+  };
+
+  const handleSelectSubAgeGroup = (subAge: SubAgeGroup) => {
+    setSubAgeGroup(subAge);
+    setStep(5);
+  };
+
+
+  const handleSelectGender = (selectedGender: Gender) => {
+    setGender(selectedGender);
+    setStep(6);
+  };
 
   return (
     <div className="flex flex-col h-full">
       <div className="bg-green max-h-[56px] h-full flex items-center pl-2 pt-1 pb-1">
         <Image
-          src={chatbotImg} // Assuming chatbotImg is imported at the top of your file
+          src={chatbotImg}
           className="w-auto max-w-[106px] h-full rounded-full border border-white mr-2 bg-white"
           alt="Avatar"
         />
         <h2 className="text-white text-lg">Ask Inteliflora</h2>
       </div>
+
+      <div className="max-w-4xl px-2 py-4">
+    {step === 1 && (
+      <>
+        <Question text="Hi! I'm Flora, your AI guide here to assist you in discovering the perfect herbal formula tailored to your unique health needs. Before we get started, could you tell me a bit about what brought you here today?" />
+        <Option onClick={() => handleSelectReason("General Health and Wellbeing")}>General Health and Wellbeing</Option>
+        <Option onClick={() => handleSelectReason("Specific Symptoms")}>Specific Symptoms</Option>
+        <Option onClick={() => handleSelectReason("Chronic Condition Management")}>Chronic Condition Management</Option>
+        <Option onClick={() => handleSelectReason("Preventive Care")}>Preventive Care</Option>
+        <Option onClick={() => handleSelectReason("Lifestyle Improvement")}>Lifestyle Improvement</Option>
+        <Option onClick={() => handleSelectReason("Reproductive Health")}>Reproductive Health</Option>
+        <Option onClick={() => handleSelectReason("Other")}>Other</Option>
+      </>
+    )}
+
+    {step === 2 && reason === "Specific Symptoms" && (
+      <>
+        <Question text="Please select your specific symptoms." />
+        <Option onClick={() => handleSelectSpecificSymptom("Pain")}>Pain</Option>
+        <Option onClick={() => handleSelectSpecificSymptom("Fatigue")}>Fatigue</Option>
+        <Option onClick={() => handleSelectSpecificSymptom("Fever")}>Fever</Option>
+        <Option onClick={() => handleSelectSpecificSymptom("Digestive issues")}>Digestive issues</Option>
+        <Option onClick={() => handleSelectSpecificSymptom("Mental health concerns")}>Mental health concerns</Option>
+        <Option onClick={() => handleSelectSpecificSymptom("Skin concerns")}>Skin concerns</Option>
+      </>
+    )}
+
+    {step === 3 && (
+      <>
+        <Question text="Please select the age range that best represents you." />
+        <Option onClick={() => handleSelectAgeGroup("Under 18")}>Under 18</Option>
+        <Option onClick={() => handleSelectAgeGroup("18-24")}>18-24</Option>
+        <Option onClick={() => handleSelectAgeGroup("25-34")}>25-34</Option>
+        <Option onClick={() => handleSelectAgeGroup("35-44")}>35-44</Option>
+        <Option onClick={() => handleSelectAgeGroup("45-54")}>45-54</Option>
+        <Option onClick={() => handleSelectAgeGroup("55-64")}>55-64</Option>
+        <Option onClick={() => handleSelectAgeGroup("65 and older")}>65 and older</Option>
+      </>
+    )}
+
+    {step === 4 && ageGroup === "Under 18" && (
+      <>
+        <Question text="Please select a more specific age range." />
+        <Option onClick={() => handleSelectSubAgeGroup("0-2 years")}>0-2 years</Option>
+        <Option onClick={() => handleSelectSubAgeGroup("3-5 years")}>3-5 years</Option>
+        <Option onClick={() => handleSelectSubAgeGroup("6-10 years")}>6-10 years</Option>
+        <Option onClick={() => handleSelectSubAgeGroup("11-13 years")}>11-13 years</Option>
+        <Option onClick={() => handleSelectSubAgeGroup("14-17 years")}>14-17 years</Option>
+      </>
+    )}
+
+    {step === 5 && (
+      <>
+        <Question text="What is your gender identity?" />
+        <Option onClick={() => handleSelectGender("Male")}>Male</Option>
+        <Option onClick={() => handleSelectGender("Female")}>Female</Option>
+        <Option onClick={() => handleSelectGender("Non-binary")}>Non-binary</Option>
+        <Option onClick={() => handleSelectGender("Prefer to self-describe")}>Prefer to self-describe</Option>
+        <Option onClick={() => handleSelectGender("Prefer not to say")}>Prefer not to say</Option>
+      </>
+    )}
+
+    {step === 6 && (
+      <>
+        <Question text="Thank you for completing the questionnaire. We will now assist you with personalized herbal formula recommendations." />
+        {/* Here, you could add a call to action or navigation to another page */}
+      </>
+    )}
+  </div>
 
       <div className="flex-1 overflow-y-auto p-4">
         {messages.map((message, idx) => (
@@ -340,26 +430,8 @@ function ChatContainer() {
           </div>
         ))}
       </div>
-      {/* Image preview row */}
-      {/* <div className="p-4">
-        {images.map((image, index) => (
-          <div key={index} className="relative inline-block">
-            <img
-              src={URL.createObjectURL(image)}
-              alt={`upload-preview ${index}`}
-              className="h-16 w-16 object-cover rounded-lg mr-2"
-            />
-            <button
-              onClick={() => removeImage(index)}
-              className="w-5 h-5 absolute top-0 right-0 bg-red-500 text-white rounded-full text-xs"
-            >
-              &times;
-            </button>
-          </div>
-        ))}
-      </div> */}
+
       <div className="p-4">
-        {/* Display only the first image if it exists */}
         {images.length > 0 && (
           <div className="relative inline-block">
             <img
@@ -376,38 +448,7 @@ function ChatContainer() {
           </div>
         )}
       </div>
-      {/* Input area */}
-      {/* <div className="flex items-center space-x-2 py-4 px-2 bg-white">
-        <label className="flex justify-center items-center p-2 rounded-full bg-gray-200 text-gray-500 w-10 h-10 cursor-pointer">
-          <FontAwesomeIcon icon={faPaperclip} className="h-5 w-5" />
-          <input
-            type="file"
-            accept="image/*"
-            // multiple
-            onChange={handleImageChange}
-            className="hidden"
-            disabled={isSending}
-          />
-        </label>
-        <textarea
-          className="flex-1 border-solid border border-gray-600 rounded-md p-2 bg-gray-200 text-gray-800 outline-none focus:outline-none"
-          placeholder="Type your message here..."
-          rows={1}
-          value={message}
-          onChange={handleMessageChange}
-        ></textarea>
-        <button
-          className="flex justify-center items-center p-2 rounded-full bg-green text-white w-10 h-10"
-          onClick={sendMessage}
-          disabled={isSending}
-        >
-          {isSending ? (
-            <FontAwesomeIcon icon={faSpinner} className="h-5 w-5 fa-spin" />
-          ) : (
-            <FontAwesomeIcon icon={faArrowRight} className="h-5 w-5" />
-          )}
-        </button>
-      </div> */}
+
       <div className="flex items-center space-x-2 py-4 px-2 bg-white">
         <label className="flex justify-center items-center p-2 rounded-full bg-gray-200 text-gray-500 w-10 h-10 cursor-pointer">
           <FontAwesomeIcon icon={faPaperclip} className="h-5 w-5" />
