@@ -271,17 +271,28 @@ function ChatContainer() {
   const [ageGroup, setAgeGroup] = useState<AgeGroup | "">("");
   const [subAgeGroup, setSubAgeGroup] = useState<SubAgeGroup | "">("");
   const [gender, setGender] = useState<Gender | "">("");
+  const [customReason, setCustomReason] = useState<string>("");
 
   const handleSelectReason = (selectedReason: Reason) => {
     setReason(selectedReason);
-    // Assuming "Specific Symptoms" needs a follow-up, otherwise skip to the age question
-    const nextStep = selectedReason === "Specific Symptoms" ? 2 : 3;
-    setStep(nextStep);
+    if (selectedReason === "Other") {
+      // Special handling for "Other" option to wait for custom input
+      setStep(1.5); // Set an intermediate step for custom input
+    } else {
+      const nextStep = selectedReason === "Specific Symptoms" ? 2 : 3;
+      setStep(nextStep);
+    }
   };
 
   const handleSelectSpecificSymptom = (symptom: SpecificSymptom) => {
     setSpecificSymptom(symptom);
-    setStep(3); 
+    setStep(3);
+  };
+
+  const handleCustomReasonSubmit = () => {
+    if (customReason.trim() !== "") {
+      setStep(3); // Move to the next step after "Other" has been addressed
+    }
   };
 
   const handleSelectAgeGroup = (age: AgeGroup) => {
@@ -289,7 +300,7 @@ function ChatContainer() {
     if (age === "Under 18") {
       setStep(4);
     } else {
-      setStep(5); 
+      setStep(5);
     }
   };
 
@@ -297,7 +308,6 @@ function ChatContainer() {
     setSubAgeGroup(subAge);
     setStep(5);
   };
-
 
   const handleSelectGender = (selectedGender: Gender) => {
     setGender(selectedGender);
@@ -316,73 +326,145 @@ function ChatContainer() {
       </div>
 
       <div className="max-w-4xl px-2 py-4">
-    {step === 1 && (
-      <>
-        <Question text="Hi! I'm Flora, your AI guide here to assist you in discovering the perfect herbal formula tailored to your unique health needs. Before we get started, could you tell me a bit about what brought you here today?" />
-        <Option onClick={() => handleSelectReason("General Health and Wellbeing")}>General Health and Wellbeing</Option>
-        <Option onClick={() => handleSelectReason("Specific Symptoms")}>Specific Symptoms</Option>
-        <Option onClick={() => handleSelectReason("Chronic Condition Management")}>Chronic Condition Management</Option>
-        <Option onClick={() => handleSelectReason("Preventive Care")}>Preventive Care</Option>
-        <Option onClick={() => handleSelectReason("Lifestyle Improvement")}>Lifestyle Improvement</Option>
-        <Option onClick={() => handleSelectReason("Reproductive Health")}>Reproductive Health</Option>
-        <Option onClick={() => handleSelectReason("Other")}>Other</Option>
-      </>
-    )}
+        {step === 1 && (
+          <>
+            <Question text="Hi! I'm Flora, your AI guide here to assist you in discovering the perfect herbal formula tailored to your unique health needs. Before we get started, could you tell me a bit about what brought you here today?" />
+            <Option
+              onClick={() => handleSelectReason("General Health and Wellbeing")}
+            >
+              General Health and Wellbeing
+            </Option>
+            <Option onClick={() => handleSelectReason("Specific Symptoms")}>
+              Specific Symptoms
+            </Option>
+            <Option
+              onClick={() => handleSelectReason("Chronic Condition Management")}
+            >
+              Chronic Condition Management
+            </Option>
+            <Option onClick={() => handleSelectReason("Preventive Care")}>
+              Preventive Care
+            </Option>
+            <Option onClick={() => handleSelectReason("Lifestyle Improvement")}>
+              Lifestyle Improvement
+            </Option>
+            <Option onClick={() => handleSelectReason("Reproductive Health")}>
+              Reproductive Health
+            </Option>
+            <Option onClick={() => handleSelectReason("Other")}>Other</Option>
+          </>
+        )}
 
-    {step === 2 && reason === "Specific Symptoms" && (
-      <>
-        <Question text="Please select your specific symptoms." />
-        <Option onClick={() => handleSelectSpecificSymptom("Pain")}>Pain</Option>
-        <Option onClick={() => handleSelectSpecificSymptom("Fatigue")}>Fatigue</Option>
-        <Option onClick={() => handleSelectSpecificSymptom("Fever")}>Fever</Option>
-        <Option onClick={() => handleSelectSpecificSymptom("Digestive issues")}>Digestive issues</Option>
-        <Option onClick={() => handleSelectSpecificSymptom("Mental health concerns")}>Mental health concerns</Option>
-        <Option onClick={() => handleSelectSpecificSymptom("Skin concerns")}>Skin concerns</Option>
-      </>
-    )}
+        {step === 2 && reason === "Specific Symptoms" && (
+          <>
+            <Question text="Please select your specific symptoms." />
+            <Option onClick={() => handleSelectSpecificSymptom("Pain")}>
+              Pain
+            </Option>
+            <Option onClick={() => handleSelectSpecificSymptom("Fatigue")}>
+              Fatigue
+            </Option>
+            <Option onClick={() => handleSelectSpecificSymptom("Fever")}>
+              Fever
+            </Option>
+            <Option
+              onClick={() => handleSelectSpecificSymptom("Digestive issues")}
+            >
+              Digestive issues
+            </Option>
+            <Option
+              onClick={() =>
+                handleSelectSpecificSymptom("Mental health concerns")
+              }
+            >
+              Mental health concerns
+            </Option>
+            <Option
+              onClick={() => handleSelectSpecificSymptom("Skin concerns")}
+            >
+              Skin concerns
+            </Option>
+          </>
+        )}
 
-    {step === 3 && (
-      <>
-        <Question text="Please select the age range that best represents you." />
-        <Option onClick={() => handleSelectAgeGroup("Under 18")}>Under 18</Option>
-        <Option onClick={() => handleSelectAgeGroup("18-24")}>18-24</Option>
-        <Option onClick={() => handleSelectAgeGroup("25-34")}>25-34</Option>
-        <Option onClick={() => handleSelectAgeGroup("35-44")}>35-44</Option>
-        <Option onClick={() => handleSelectAgeGroup("45-54")}>45-54</Option>
-        <Option onClick={() => handleSelectAgeGroup("55-64")}>55-64</Option>
-        <Option onClick={() => handleSelectAgeGroup("65 and older")}>65 and older</Option>
-      </>
-    )}
+        {step === 1.5 && (
+          <>
+            <Question text="Please describe your reason." />
+            <input
+              type="text"
+              value={customReason}
+              onChange={(e) => setCustomReason(e.target.value)}
+              className="my-2 border border-gray-400 rounded p-2 w-full outline-none focus:outline-none"
+              placeholder="Type here..."
+            />
+            <Option onClick={handleCustomReasonSubmit}>Submit</Option>
+          </>
+        )}
 
-    {step === 4 && ageGroup === "Under 18" && (
-      <>
-        <Question text="Please select a more specific age range." />
-        <Option onClick={() => handleSelectSubAgeGroup("0-2 years")}>0-2 years</Option>
-        <Option onClick={() => handleSelectSubAgeGroup("3-5 years")}>3-5 years</Option>
-        <Option onClick={() => handleSelectSubAgeGroup("6-10 years")}>6-10 years</Option>
-        <Option onClick={() => handleSelectSubAgeGroup("11-13 years")}>11-13 years</Option>
-        <Option onClick={() => handleSelectSubAgeGroup("14-17 years")}>14-17 years</Option>
-      </>
-    )}
+        {step === 3 && (
+          <>
+            <Question text="Please select the age range that best represents you." />
+            <Option onClick={() => handleSelectAgeGroup("Under 18")}>
+              Under 18
+            </Option>
+            <Option onClick={() => handleSelectAgeGroup("18-24")}>18-24</Option>
+            <Option onClick={() => handleSelectAgeGroup("25-34")}>25-34</Option>
+            <Option onClick={() => handleSelectAgeGroup("35-44")}>35-44</Option>
+            <Option onClick={() => handleSelectAgeGroup("45-54")}>45-54</Option>
+            <Option onClick={() => handleSelectAgeGroup("55-64")}>55-64</Option>
+            <Option onClick={() => handleSelectAgeGroup("65 and older")}>
+              65 and older
+            </Option>
+          </>
+        )}
 
-    {step === 5 && (
-      <>
-        <Question text="What is your gender identity?" />
-        <Option onClick={() => handleSelectGender("Male")}>Male</Option>
-        <Option onClick={() => handleSelectGender("Female")}>Female</Option>
-        <Option onClick={() => handleSelectGender("Non-binary")}>Non-binary</Option>
-        <Option onClick={() => handleSelectGender("Prefer to self-describe")}>Prefer to self-describe</Option>
-        <Option onClick={() => handleSelectGender("Prefer not to say")}>Prefer not to say</Option>
-      </>
-    )}
+        {step === 4 && ageGroup === "Under 18" && (
+          <>
+            <Question text="Please select a more specific age range." />
+            <Option onClick={() => handleSelectSubAgeGroup("0-2 years")}>
+              0-2 years
+            </Option>
+            <Option onClick={() => handleSelectSubAgeGroup("3-5 years")}>
+              3-5 years
+            </Option>
+            <Option onClick={() => handleSelectSubAgeGroup("6-10 years")}>
+              6-10 years
+            </Option>
+            <Option onClick={() => handleSelectSubAgeGroup("11-13 years")}>
+              11-13 years
+            </Option>
+            <Option onClick={() => handleSelectSubAgeGroup("14-17 years")}>
+              14-17 years
+            </Option>
+          </>
+        )}
 
-    {step === 6 && (
-      <>
-        <Question text="Thank you for completing the questionnaire. We will now assist you with personalized herbal formula recommendations." />
-        {/* Here, you could add a call to action or navigation to another page */}
-      </>
-    )}
-  </div>
+        {step === 5 && (
+          <>
+            <Question text="What is your gender identity?" />
+            <Option onClick={() => handleSelectGender("Male")}>Male</Option>
+            <Option onClick={() => handleSelectGender("Female")}>Female</Option>
+            <Option onClick={() => handleSelectGender("Non-binary")}>
+              Non-binary
+            </Option>
+            <Option
+              onClick={() => handleSelectGender("Prefer to self-describe")}
+            >
+              Prefer to self-describe
+            </Option>
+            <Option onClick={() => handleSelectGender("Prefer not to say")}>
+              Prefer not to say
+            </Option>
+          </>
+        )}
+
+        {step === 6 && (
+          <>
+            <Question text="Thank you for completing the questionnaire. We will now assist you with personalized herbal formula recommendations." />
+            {/* Here, you could add a call to action or navigation to another page */}
+          </>
+        )}
+      </div>
 
       <div className="flex-1 overflow-y-auto p-4">
         {messages.map((message, idx) => (
