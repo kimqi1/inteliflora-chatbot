@@ -491,6 +491,7 @@ function ChatContainer() {
                         dangerouslySetInnerHTML={{
                           __html: formatMessage(content.text),
                         }}
+                        className="text-sm"
                       />
                     );
                   } else if (content.type === "image_url") {
@@ -506,7 +507,7 @@ function ChatContainer() {
                 })
               ) : (
                 // If message.content is not an array, render it as a string
-                <p>{message.content}</p>
+                <p className="text-sm">{message.content}</p>
               )}
             </div>
           </div>
