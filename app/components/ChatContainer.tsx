@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faPaperclip,
@@ -26,6 +26,14 @@ import {
   HeadacheSevere,
   JointSevere,
   MuscleTrigger,
+  AbdominalLocation,
+  AbdominalSevere,
+  ChestSevere,
+  ChestTrigger,
+  BackLocation,
+  BackSevere,
+  MentalState,
+  Energy,
 } from "../../types";
 
 // Define the structure of a message
@@ -267,6 +275,9 @@ function ChatContainer() {
   }
 
   // form related questions
+  const [userFlow, setUserFlow] = useState<
+    Array<{ question: string; answer: string }>
+  >([]);
   const [step, setStep] = useState<number>(1);
   const [reason, setReason] = useState<Reason | "">("");
   const [specificSymptom, setSpecificSymptom] = useState<SpecificSymptom | "">(
@@ -277,17 +288,37 @@ function ChatContainer() {
   const [hs, setHs] = useState<HeadacheSevere | "">("");
   const [js, setJs] = useState<JointSevere | "">("");
   const [mt, setMt] = useState<MuscleTrigger | "">("");
+  const [al, setAl] = useState<AbdominalLocation | "">("");
+  const [as, setAs] = useState<AbdominalSevere | "">("");
+  const [ct, setCt] = useState<ChestTrigger | "">("");
+  const [cs, setCs] = useState<ChestSevere | "">("");
+  const [bl, setBl] = useState<BackLocation | "">("");
+  const [bs, setBs] = useState<BackSevere | "">("");
+  const [otherQ171, setOtherQ171] = useState<string>(""); //q171 other
 
   const [ageGroup, setAgeGroup] = useState<AgeGroup | "">("");
   const [gender, setGender] = useState<Gender | "">("");
+  const [mentalState, setMentalState] = useState<MentalState | "">("");
+  const [energy, setEnergy] = useState<Energy | "">("");
 
   const [otherQ1, setOtherQ1] = useState<string>(""); //q1 other
+  const [otherQ12, setOtherQ12] = useState<string>(""); //q12 other
 
   const handleSelectReason = (selectedReason: Reason) => {
     setReason(selectedReason);
     if (selectedReason === "Other") {
       setStep(1.2);
     } else {
+      setUserFlow((prevFlow) => [
+        ...prevFlow,
+        {
+          question:
+            "Hi! I'm Flora, your AI guide here to assist you in discovering the perfect herbal formula tailored to your unique health needs. Before we get started, could you tell me a bit about what brought you here today?",
+          answer: selectedReason,
+        },
+      ]);
+      console.log(userFlow);
+
       const nextStep =
         selectedReason === "Address specific health issues" ? 1.1 : 2;
       setStep(nextStep);
@@ -296,7 +327,16 @@ function ChatContainer() {
 
   const handleSelectSpecificSymptom = (symptom: SpecificSymptom) => {
     setSpecificSymptom(symptom);
-    symptom == "Pain or discomfort" ? setStep(1.11) : "";
+    switch (symptom) {
+      case "Pain or discomfort":
+        setStep(1.11);
+        break;
+      case "Other":
+        setStep(1.12);
+        break;
+      default:
+        setStep(2);
+    }
   };
 
   const handleSelectSpecificPain = (pain: SpecificPain) => {
@@ -304,10 +344,27 @@ function ChatContainer() {
     switch (pain) {
       case "Headache":
         setStep(1.111);
+        break;
       case "Joint pain":
         setStep(1.121);
+        break;
       case "Muscle ache":
         setStep(1.131);
+        break;
+      case "Abdominal pain":
+        setStep(1.141);
+        break;
+      case "Chest discomfort":
+        setStep(1.151);
+        break;
+      case "Back pain":
+        setStep(1.161);
+        break;
+      case "Other":
+        setStep(1.171);
+        break;
+      default:
+        setStep(2);
     }
     // setStep(3);
   };
@@ -355,7 +412,7 @@ function ChatContainer() {
     []
   );
   const handleSelectSpecificMuscle = (option: string) => {
-    setSelectedJointOptions((currentOptions) => {
+    setSelectedMuscleOptions((currentOptions) => {
       if (currentOptions.includes(option)) {
         // If the option is already selected, remove it
         return currentOptions.filter(
@@ -377,8 +434,56 @@ function ChatContainer() {
     // setStep(3);
   };
 
+  const handleSelectAl = (al: AbdominalLocation) => {
+    setAl(al);
+
+    // setStep(3);
+  };
+
+  const handleSelectAs = (as: AbdominalSevere) => {
+    setAs(as);
+
+    // setStep(3);
+  };
+
+  const handleSelectCt = (ct: ChestTrigger) => {
+    setCt(ct);
+
+    // setStep(3);
+  };
+
+  const handleSelectCs = (cs: ChestSevere) => {
+    setCs(cs);
+
+    // setStep(3);
+  };
+
+  const handleSelectBl = (bl: BackLocation) => {
+    setBl(bl);
+
+    // setStep(3);
+  };
+
+  const handleSelectBs = (bs: BackSevere) => {
+    setBs(bs);
+
+    // setStep(3);
+  };
+
+  const handleOtherQ171Submit = () => {
+    if (otherQ171.trim() !== "") {
+      setStep(2);
+    }
+  };
+
   const handleOtherQ1Submit = () => {
     if (otherQ1.trim() !== "") {
+      setStep(2);
+    }
+  };
+
+  const handleOtherQ12Submit = () => {
+    if (otherQ12.trim() !== "") {
       setStep(2);
     }
   };
@@ -391,6 +496,16 @@ function ChatContainer() {
   const handleSelectGender = (selectedGender: Gender) => {
     setGender(selectedGender);
     setStep(4);
+  };
+
+  const handleSelectMental = (selectedMental: MentalState) => {
+    setMentalState(selectedMental);
+    setStep(5);
+  };
+
+  const handleSelectEnergy = (selectedEnergy: Energy) => {
+    setEnergy(selectedEnergy);
+    setStep(6);
   };
 
   return (
@@ -448,6 +563,20 @@ function ChatContainer() {
           </>
         )}
 
+        {step === 1.12 && (
+          <>
+            <Question text="Please describe your health issue." />
+            <input
+              type="text"
+              value={otherQ12}
+              onChange={(e) => setOtherQ12(e.target.value)}
+              className="my-2 border border-gray-400 rounded p-2 w-full outline-none focus:outline-none"
+              placeholder="Type here..."
+            />
+            <Option onClick={handleOtherQ12Submit}>Submit</Option>
+          </>
+        )}
+
         {step === 1.11 && (
           <>
             <Question text="Please select the type that best describes your condition." />
@@ -481,9 +610,9 @@ function ChatContainer() {
                 "Back of head/neck area",
                 "All over/General",
               ] as HeadacheLocation[]
-            ).map((hl) => (
-              <Option key={hl} onClick={() => handleSelectHl(hl)}>
-                {hl}
+            ).map((option) => (
+              <Option key={option} onClick={() => handleSelectHl(option)}>
+                {option}
               </Option>
             ))}
           </>
@@ -499,9 +628,9 @@ function ChatContainer() {
                 "Sharp or stabbing",
                 "Constant dull ache",
               ] as HeadacheSevere[]
-            ).map((hs) => (
-              <Option key={hs} onClick={() => handleSelectHs(hs)}>
-                {hs}
+            ).map((option) => (
+              <Option key={option} onClick={() => handleSelectHs(option)}>
+                {option}
               </Option>
             ))}
           </>
@@ -600,6 +729,129 @@ function ChatContainer() {
           </>
         )}
 
+        {step === 1.141 && (
+          <>
+            <Question text="Can you pinpoint where the abdominal pain is most intense?" />
+            {(
+              [
+                "Upper abdomen",
+                "Lower abdomen",
+                "Right side",
+                "Left side",
+                "Diffuse, all over the abdomen",
+              ] as AbdominalLocation[]
+            ).map((option) => (
+              <Option key={option} onClick={() => handleSelectAl(option)}>
+                {option}
+              </Option>
+            ))}
+          </>
+        )}
+
+        {step === 1.142 && (
+          <>
+            <Question text="What type of sensation do you experience with your abdominal pain?" />
+            {(
+              [
+                "Sharp or stabbing",
+                "Cramping or spasmodic",
+                "Dull or aching",
+                "Bloating or gassy feeling",
+              ] as AbdominalSevere[]
+            ).map((option) => (
+              <Option key={option} onClick={() => handleSelectAs(option)}>
+                {option}
+              </Option>
+            ))}
+          </>
+        )}
+
+        {step === 1.151 && (
+          <>
+            <Question text="Can you describe the nature of your chest discomfort?" />
+            {(
+              [
+                "Sharp or piercing pain",
+                "Tightness or pressure",
+                "Burning sensation",
+                "Heavy feeling or squeezing",
+              ] as ChestSevere[]
+            ).map((option) => (
+              <Option key={option} onClick={() => handleSelectCs(option)}>
+                {option}
+              </Option>
+            ))}
+          </>
+        )}
+
+        {step === 1.152 && (
+          <>
+            <Question text="Does anything specific trigger your chest discomfort?" />
+            {(
+              [
+                "Physical exertion",
+                "Emotional stress",
+                "Eating or digestion",
+                "Breathing deeply",
+              ] as ChestTrigger[]
+            ).map((option) => (
+              <Option key={option} onClick={() => handleSelectCt(option)}>
+                {option}
+              </Option>
+            ))}
+          </>
+        )}
+
+        {step === 1.161 && (
+          <>
+            <Question text="Where is your back pain located?" />
+            {(
+              [
+                "Upper back",
+                "Middle back",
+                "Lower back",
+                "Spreads to the buttocks or legs",
+              ] as BackLocation[]
+            ).map((option) => (
+              <Option key={option} onClick={() => handleSelectBl(option)}>
+                {option}
+              </Option>
+            ))}
+          </>
+        )}
+
+        {step === 1.162 && (
+          <>
+            <Question text="How would you describe your back pain?" />
+            {(
+              [
+                "Sharp or stabbing",
+                "Dull or aching",
+                "Burning sensation",
+                "Stiffness or immobility",
+              ] as BackSevere[]
+            ).map((option) => (
+              <Option key={option} onClick={() => handleSelectBs(option)}>
+                {option}
+              </Option>
+            ))}
+          </>
+        )}
+
+        {step === 1.171 && (
+          <>
+            <Question text="Please specify the location and describe the type of pain or discomfort you are experiencing" />
+            <input
+              type="text"
+              value={otherQ171}
+              onChange={(e) => setOtherQ171(e.target.value)}
+              className="my-2 border border-gray-400 rounded p-2 w-full outline-none focus:outline-none"
+              placeholder="Type here..."
+            />
+            <Option onClick={handleOtherQ171Submit}>Submit</Option>
+          </>
+        )}
+
         {step === 1.2 && (
           <>
             <Question text="Please describe your reason." />
@@ -614,39 +866,73 @@ function ChatContainer() {
           </>
         )}
 
-        {step === 3 && (
+        {step === 2 && (
           <>
             <Question text="Please select the age range that best represents you." />
-            <Option onClick={() => handleSelectAgeGroup("Under 18")}>
-              Under 18
-            </Option>
-            <Option onClick={() => handleSelectAgeGroup("18-24")}>18-24</Option>
-            <Option onClick={() => handleSelectAgeGroup("25-34")}>25-34</Option>
-            <Option onClick={() => handleSelectAgeGroup("35-44")}>35-44</Option>
-            <Option onClick={() => handleSelectAgeGroup("45-54")}>45-54</Option>
-            <Option onClick={() => handleSelectAgeGroup("55-64")}>55-64</Option>
-            <Option onClick={() => handleSelectAgeGroup("65 and older")}>
-              65 and older
-            </Option>
+            {(
+              [
+                "Under 18",
+                "18-30",
+                "31-40",
+                "41-50",
+                "51-60",
+                "61 and older",
+              ] as AgeGroup[]
+            ).map((option) => (
+              <Option key={option} onClick={() => handleSelectAgeGroup(option)}>
+                {option}
+              </Option>
+            ))}
+          </>
+        )}
+
+        {step === 3 && (
+          <>
+            <Question text="What is your gender identity?" />
+            {(
+              ["Male", "Female", "Non-binary", "Prefer not to say"] as Gender[]
+            ).map((option) => (
+              <Option key={option} onClick={() => handleSelectGender(option)}>
+                {option}
+              </Option>
+            ))}
+          </>
+        )}
+
+        {step === 4 && (
+          <>
+            <Question text="How would you describe your current mental and emotional state?" />
+            {(
+              [
+                "Generally stable and positive",
+                "Frequently anxious or nervous",
+                "Often feel down or depressed",
+                "Experience mood swings",
+                "Feel stressed or overwhelmed",
+                "Other",
+              ] as MentalState[]
+            ).map((option) => (
+              <Option key={option} onClick={() => handleSelectMental(option)}>
+                {option}
+              </Option>
+            ))}
           </>
         )}
 
         {step === 5 && (
           <>
-            <Question text="What is your gender identity?" />
-            <Option onClick={() => handleSelectGender("Male")}>Male</Option>
-            <Option onClick={() => handleSelectGender("Female")}>Female</Option>
-            <Option onClick={() => handleSelectGender("Non-binary")}>
-              Non-binary
-            </Option>
-            <Option
-              onClick={() => handleSelectGender("Prefer to self-describe")}
-            >
-              Prefer to self-describe
-            </Option>
-            <Option onClick={() => handleSelectGender("Prefer not to say")}>
-              Prefer not to say
-            </Option>
+            <Question text="Have you noticed any changes in your energy levels lately?" />
+            {(
+              [
+                "Yes, I feel more energetic",
+                "Yes, I feel less energetic",
+                "No significant change",
+              ] as Energy[]
+            ).map((option) => (
+              <Option key={option} onClick={() => handleSelectEnergy(option)}>
+                {option}
+              </Option>
+            ))}
           </>
         )}
 
@@ -658,7 +944,7 @@ function ChatContainer() {
         )}
       </div>
 
-      <div className="flex-1 overflow-y-auto p-4">
+      <div className="flex-1 overflow-y-auto px-2 py-4">
         {messages.map((message, idx) => (
           <div
             key={idx}
@@ -667,7 +953,7 @@ function ChatContainer() {
             }`}
           >
             <div
-              className={`rounded-lg p-2 max-w-xs md:max-w-xl ${
+              className={`rounded-md p-2 max-w-xs md:max-w-xl ${
                 message.role === "user"
                   ? "bg-green text-white"
                   : "bg-gray-200 text-black"
