@@ -24,6 +24,8 @@ import {
   Gender,
   HeadacheLocation,
   HeadacheSevere,
+  JointSevere,
+  MuscleTrigger,
 } from "../../types";
 
 // Define the structure of a message
@@ -273,9 +275,10 @@ function ChatContainer() {
   const [specificPain, setSpecificPain] = useState<SpecificPain | "">("");
   const [hl, setHl] = useState<HeadacheLocation | "">("");
   const [hs, setHs] = useState<HeadacheSevere | "">("");
+  const [js, setJs] = useState<JointSevere | "">("");
+  const [mt, setMt] = useState<MuscleTrigger | "">("");
 
   const [ageGroup, setAgeGroup] = useState<AgeGroup | "">("");
-
   const [gender, setGender] = useState<Gender | "">("");
 
   const [otherQ1, setOtherQ1] = useState<string>(""); //q1 other
@@ -301,6 +304,10 @@ function ChatContainer() {
     switch (pain) {
       case "Headache":
         setStep(1.111);
+      case "Joint pain":
+        setStep(1.121);
+      case "Muscle ache":
+        setStep(1.131);
     }
     // setStep(3);
   };
@@ -316,9 +323,63 @@ function ChatContainer() {
     // setStep(3);
   };
 
+  // multiselect option start
+  const [selectedJointOptions, setSelectedJointOptions] = useState<string[]>(
+    []
+  );
+  const handleSelectSpecificJoint = (option: string) => {
+    setSelectedJointOptions((currentOptions) => {
+      if (currentOptions.includes(option)) {
+        // If the option is already selected, remove it
+        return currentOptions.filter(
+          (currentOption) => currentOption !== option
+        );
+      } else {
+        // Otherwise, add the option to the selected list
+        return [...currentOptions, option];
+      }
+    });
+  };
+  const handleJointNext = () => {
+    setStep(1.122);
+  };
+  // multiselect option end
+
+  const handleSelectJs = (js: JointSevere) => {
+    setJs(js);
+    // setStep(3);
+  };
+
+  // multiselect option start
+  const [selectedMuscleOptions, setSelectedMuscleOptions] = useState<string[]>(
+    []
+  );
+  const handleSelectSpecificMuscle = (option: string) => {
+    setSelectedJointOptions((currentOptions) => {
+      if (currentOptions.includes(option)) {
+        // If the option is already selected, remove it
+        return currentOptions.filter(
+          (currentOption) => currentOption !== option
+        );
+      } else {
+        // Otherwise, add the option to the selected list
+        return [...currentOptions, option];
+      }
+    });
+  };
+  const handleMuscleNext = () => {
+    setStep(1.132);
+  };
+  // multiselect option end
+
+  const handleSelectMt = (mt: MuscleTrigger) => {
+    setMt(mt);
+    // setStep(3);
+  };
+
   const handleOtherQ1Submit = () => {
     if (otherQ1.trim() !== "") {
-      setStep(2); // Move to the next step after "Other" has been addressed
+      setStep(2);
     }
   };
 
@@ -441,6 +502,99 @@ function ChatContainer() {
             ).map((hs) => (
               <Option key={hs} onClick={() => handleSelectHs(hs)}>
                 {hs}
+              </Option>
+            ))}
+          </>
+        )}
+
+        {step === 1.121 && (
+          <>
+            <Question text="Which joints are affected? (Select all that apply)" />
+            {[
+              "Hands or wrists",
+              "Knees",
+              "Elbows",
+              "Shoulders",
+              "Hips",
+              "Ankles or feet",
+            ].map((option) => (
+              <Option
+                key={option}
+                onClick={() => handleSelectSpecificJoint(option)}
+                isSelected={selectedJointOptions.includes(option)}
+              >
+                {option}
+              </Option>
+            ))}
+            <br></br>
+            <button
+              className="mt-4 text-sm border py-2 px-6 rounded bg-green text-white "
+              onClick={handleJointNext}
+            >
+              Next
+            </button>
+          </>
+        )}
+
+        {step === 1.122 && (
+          <>
+            <Question text="How would you describe the pain in your joints?" />
+            {(
+              [
+                "Sharp or severe",
+                "Dull or aching",
+                "Stiffness or limited movement",
+                "Swelling or warmth",
+              ] as JointSevere[]
+            ).map((option) => (
+              <Option key={option} onClick={() => handleSelectJs(option)}>
+                {option}
+              </Option>
+            ))}
+          </>
+        )}
+
+        {step === 1.131 && (
+          <>
+            <Question text="Where is the muscle ache located? (Select all that apply)" />
+            {[
+              "Upper back and shoulders",
+              "Lower back",
+              "Arms",
+              "Legs",
+              "General body ache",
+            ].map((option) => (
+              <Option
+                key={option}
+                onClick={() => handleSelectSpecificMuscle(option)}
+                isSelected={selectedMuscleOptions.includes(option)}
+              >
+                {option}
+              </Option>
+            ))}
+            <br></br>
+            <button
+              className="mt-4 text-sm border py-2 px-6 rounded bg-green text-white "
+              onClick={handleMuscleNext}
+            >
+              Next
+            </button>
+          </>
+        )}
+
+        {step === 1.132 && (
+          <>
+            <Question text="What triggers your muscle ache?" />
+            {(
+              [
+                "Physical activity or exercise",
+                "Stress or tension",
+                "Prolonged sitting or standing",
+                "Unidentified; it occurs randomly",
+              ] as MuscleTrigger[]
+            ).map((option) => (
+              <Option key={option} onClick={() => handleSelectMt(option)}>
+                {option}
               </Option>
             ))}
           </>

@@ -35,6 +35,18 @@ export type HeadacheSevere =
   | "Sharp or stabbing"
   | "Constant dull ache";
 
+export type JointSevere =
+  | "Sharp or severe"
+  | "Dull or aching"
+  | "Stiffness or limited movement"
+  | "Swelling or warmth";
+
+export type MuscleTrigger =
+  | "Physical activity or exercise"
+  | "Stress or tension"
+  | "Prolonged sitting or standing"
+  | "Unidentified; it occurs randomly";
+
 export type AgeGroup =
   | "Under 18"
   | "18-24"
@@ -59,4 +71,5 @@ export type Gender =
 export interface IOptionProps {
   onClick: () => void;
   children: React.ReactNode;
+  isSelected?: boolean;
 }
