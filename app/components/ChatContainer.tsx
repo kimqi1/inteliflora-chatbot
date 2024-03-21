@@ -18,10 +18,12 @@ import Option from "../components/Option";
 import {
   Reason,
   SpecificSymptom,
-  ChronicCondition,
+  SpecificPain,
   AgeGroup,
   SubAgeGroup,
   Gender,
+  HeadacheLocation,
+  HeadacheSevere,
 } from "../../types";
 
 // Define the structure of a message
@@ -268,50 +270,66 @@ function ChatContainer() {
   const [specificSymptom, setSpecificSymptom] = useState<SpecificSymptom | "">(
     ""
   );
+  const [specificPain, setSpecificPain] = useState<SpecificPain | "">("");
+  const [hl, setHl] = useState<HeadacheLocation | "">("");
+  const [hs, setHs] = useState<HeadacheSevere | "">("");
+
   const [ageGroup, setAgeGroup] = useState<AgeGroup | "">("");
-  const [subAgeGroup, setSubAgeGroup] = useState<SubAgeGroup | "">("");
+
   const [gender, setGender] = useState<Gender | "">("");
-  const [customReason, setCustomReason] = useState<string>("");
+
+  const [otherQ1, setOtherQ1] = useState<string>(""); //q1 other
 
   const handleSelectReason = (selectedReason: Reason) => {
     setReason(selectedReason);
     if (selectedReason === "Other") {
-      // Special handling for "Other" option to wait for custom input
-      setStep(1.5); // Set an intermediate step for custom input
+      setStep(1.2);
     } else {
-      const nextStep = selectedReason === "Specific Symptoms" ? 2 : 3;
+      const nextStep =
+        selectedReason === "Address specific health issues" ? 1.1 : 2;
       setStep(nextStep);
     }
   };
 
   const handleSelectSpecificSymptom = (symptom: SpecificSymptom) => {
     setSpecificSymptom(symptom);
-    setStep(3);
+    symptom == "Pain or discomfort" ? setStep(1.11) : "";
   };
 
-  const handleCustomReasonSubmit = () => {
-    if (customReason.trim() !== "") {
-      setStep(3); // Move to the next step after "Other" has been addressed
+  const handleSelectSpecificPain = (pain: SpecificPain) => {
+    setSpecificPain(pain);
+    switch (pain) {
+      case "Headache":
+        setStep(1.111);
+    }
+    // setStep(3);
+  };
+
+  const handleSelectHl = (hl: HeadacheLocation) => {
+    setHl(hl);
+    setStep(1.112);
+  };
+
+  const handleSelectHs = (hs: HeadacheSevere) => {
+    setHs(hs);
+
+    // setStep(3);
+  };
+
+  const handleOtherQ1Submit = () => {
+    if (otherQ1.trim() !== "") {
+      setStep(2); // Move to the next step after "Other" has been addressed
     }
   };
 
   const handleSelectAgeGroup = (age: AgeGroup) => {
     setAgeGroup(age);
-    if (age === "Under 18") {
-      setStep(4);
-    } else {
-      setStep(5);
-    }
-  };
-
-  const handleSelectSubAgeGroup = (subAge: SubAgeGroup) => {
-    setSubAgeGroup(subAge);
-    setStep(5);
+    setStep(3);
   };
 
   const handleSelectGender = (selectedGender: Gender) => {
     setGender(selectedGender);
-    setStep(6);
+    setStep(4);
   };
 
   return (
@@ -329,75 +347,116 @@ function ChatContainer() {
         {step === 1 && (
           <>
             <Question text="Hi! I'm Flora, your AI guide here to assist you in discovering the perfect herbal formula tailored to your unique health needs. Before we get started, could you tell me a bit about what brought you here today?" />
-            <Option
-              onClick={() => handleSelectReason("General Health and Wellbeing")}
-            >
-              General Health and Wellbeing
-            </Option>
-            <Option onClick={() => handleSelectReason("Specific Symptoms")}>
-              Specific Symptoms
-            </Option>
-            <Option
-              onClick={() => handleSelectReason("Chronic Condition Management")}
-            >
-              Chronic Condition Management
-            </Option>
-            <Option onClick={() => handleSelectReason("Preventive Care")}>
-              Preventive Care
-            </Option>
-            <Option onClick={() => handleSelectReason("Lifestyle Improvement")}>
-              Lifestyle Improvement
-            </Option>
-            <Option onClick={() => handleSelectReason("Reproductive Health")}>
-              Reproductive Health
-            </Option>
-            <Option onClick={() => handleSelectReason("Other")}>Other</Option>
+            {(
+              [
+                "General Health and Wellbeing",
+                "Address specific health issues",
+                "Support recovery from an illness or injury",
+                "Other",
+              ] as Reason[]
+            ).map((reason) => (
+              <Option key={reason} onClick={() => handleSelectReason(reason)}>
+                {reason}
+              </Option>
+            ))}
           </>
         )}
 
-        {step === 2 && reason === "Specific Symptoms" && (
+        {step === 1.1 && (
           <>
-            <Question text="Please select your specific symptoms." />
-            <Option onClick={() => handleSelectSpecificSymptom("Pain")}>
-              Pain
-            </Option>
-            <Option onClick={() => handleSelectSpecificSymptom("Fatigue")}>
-              Fatigue
-            </Option>
-            <Option onClick={() => handleSelectSpecificSymptom("Fever")}>
-              Fever
-            </Option>
-            <Option
-              onClick={() => handleSelectSpecificSymptom("Digestive issues")}
-            >
-              Digestive issues
-            </Option>
-            <Option
-              onClick={() =>
-                handleSelectSpecificSymptom("Mental health concerns")
-              }
-            >
-              Mental health concerns
-            </Option>
-            <Option
-              onClick={() => handleSelectSpecificSymptom("Skin concerns")}
-            >
-              Skin concerns
-            </Option>
+            <Question text="Please select your primary health issue." />
+            {(
+              [
+                "Pain or discomfort",
+                "Digestive issues",
+                "Sleep disturbances",
+                "Emotional or mental health concerns",
+                "Energy level concerns",
+                "Skin conditions",
+                "Respiratory issues",
+                "Other",
+              ] as SpecificSymptom[]
+            ).map((symptom) => (
+              <Option
+                key={symptom}
+                onClick={() => handleSelectSpecificSymptom(symptom)}
+              >
+                {symptom}
+              </Option>
+            ))}
           </>
         )}
 
-        {step === 1.5 && (
+        {step === 1.11 && (
+          <>
+            <Question text="Please select the type that best describes your condition." />
+            {(
+              [
+                "Headache",
+                "Joint pain",
+                "Muscle ache",
+                "Abdominal pain",
+                "Chest discomfort",
+                "Back pain",
+                "None",
+                "Other",
+              ] as SpecificPain[]
+            ).map((pain) => (
+              <Option key={pain} onClick={() => handleSelectSpecificPain(pain)}>
+                {pain}
+              </Option>
+            ))}
+          </>
+        )}
+
+        {step === 1.111 && (
+          <>
+            <Question text="Where is your headache primarily located?" />
+            {(
+              [
+                "Forehead",
+                "Temples",
+                "Top of head",
+                "Back of head/neck area",
+                "All over/General",
+              ] as HeadacheLocation[]
+            ).map((hl) => (
+              <Option key={hl} onClick={() => handleSelectHl(hl)}>
+                {hl}
+              </Option>
+            ))}
+          </>
+        )}
+
+        {step === 1.112 && (
+          <>
+            <Question text="How would you describe your headache?" />
+            {(
+              [
+                "Throbbing or pulsating",
+                "Pressing or tightening",
+                "Sharp or stabbing",
+                "Constant dull ache",
+              ] as HeadacheSevere[]
+            ).map((hs) => (
+              <Option key={hs} onClick={() => handleSelectHs(hs)}>
+                {hs}
+              </Option>
+            ))}
+          </>
+        )}
+
+        {step === 1.2 && (
           <>
             <Question text="Please describe your reason." />
             <input
               type="text"
-              value={customReason}
-              onChange={(e) => setCustomReason(e.target.value)}
+              value={otherQ1}
+              onChange={(e) => setOtherQ1(e.target.value)}
               className="my-2 border border-gray-400 rounded p-2 w-full outline-none focus:outline-none"
               placeholder="Type here..."
             />
-            <Option onClick={handleCustomReasonSubmit}>Submit</Option>
+            <Option onClick={handleOtherQ1Submit}>Submit</Option>
           </>
         )}
 
@@ -414,27 +473,6 @@ function ChatContainer() {
             <Option onClick={() => handleSelectAgeGroup("55-64")}>55-64</Option>
             <Option onClick={() => handleSelectAgeGroup("65 and older")}>
               65 and older
-            </Option>
-          </>
-        )}
-
-        {step === 4 && ageGroup === "Under 18" && (
-          <>
-            <Question text="Please select a more specific age range." />
-            <Option onClick={() => handleSelectSubAgeGroup("0-2 years")}>
-              0-2 years
-            </Option>
-            <Option onClick={() => handleSelectSubAgeGroup("3-5 years")}>
-              3-5 years
-            </Option>
-            <Option onClick={() => handleSelectSubAgeGroup("6-10 years")}>
-              6-10 years
-            </Option>
-            <Option onClick={() => handleSelectSubAgeGroup("11-13 years")}>
-              11-13 years
-            </Option>
-            <Option onClick={() => handleSelectSubAgeGroup("14-17 years")}>
-              14-17 years
             </Option>
           </>
         )}
