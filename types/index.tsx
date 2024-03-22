@@ -114,6 +114,21 @@ export type Energy =
   | "Yes, I feel less energetic"
   | "No significant change";
 
+export type Sleep =
+  | "Regular and restful"
+  | "Difficulty falling asleep"
+  | "Waking up frequently during the night"
+  | "Feeling tired after waking up";
+
+export type Diet =
+  | "Eating more than usual"
+  | "Eating less than usual"
+  | "Cravings for specific foods"
+  | "Changes in appetite but not in eating habits"
+  | "No significant changes";
+
+export type Medications = "Yes" | "No";
+
 export interface IOptionProps {
   onClick: () => void;
   children: React.ReactNode;

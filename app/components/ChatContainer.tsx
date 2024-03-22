@@ -34,6 +34,9 @@ import {
   BackSevere,
   MentalState,
   Energy,
+  Sleep,
+  Diet,
+  Medications,
 } from "../../types";
 
 // Define the structure of a message
@@ -57,6 +60,448 @@ type ImageContent = {
 };
 
 function ChatContainer() {
+  // form related questions
+  const [userFlow, setUserFlow] = useState<
+    Array<{ question: string; answer: string }>
+  >([]);
+  const [step, setStep] = useState<number>(1);
+  const [reason, setReason] = useState<Reason | "">("");
+  const [specificSymptom, setSpecificSymptom] = useState<SpecificSymptom | "">(
+    ""
+  );
+  const [specificPain, setSpecificPain] = useState<SpecificPain | "">("");
+  const [hl, setHl] = useState<HeadacheLocation | "">("");
+  const [hs, setHs] = useState<HeadacheSevere | "">("");
+  const [js, setJs] = useState<JointSevere | "">("");
+  const [mt, setMt] = useState<MuscleTrigger | "">("");
+  const [al, setAl] = useState<AbdominalLocation | "">("");
+  const [as, setAs] = useState<AbdominalSevere | "">("");
+  const [ct, setCt] = useState<ChestTrigger | "">("");
+  const [cs, setCs] = useState<ChestSevere | "">("");
+  const [bl, setBl] = useState<BackLocation | "">("");
+  const [bs, setBs] = useState<BackSevere | "">("");
+
+  const [ageGroup, setAgeGroup] = useState<AgeGroup | "">("");
+  const [gender, setGender] = useState<Gender | "">("");
+  const [mentalState, setMentalState] = useState<MentalState | "">("");
+  const [energy, setEnergy] = useState<Energy | "">("");
+  const [sleep, setSleep] = useState<Sleep | "">("");
+  const [diet, setDiet] = useState<Diet | "">("");
+  const [medications, setMedications] = useState<Medications | "">("");
+
+  const [otherQ1, setOtherQ1] = useState<string>(""); //q1 other
+  const [otherQ171, setOtherQ171] = useState<string>(""); //q171 other
+  const [otherQ12, setOtherQ12] = useState<string>(""); //q12 other
+  const [otherQ81, setOtherQ81] = useState<string>(""); //q81 other
+
+  const handleSelectReason = (selectedReason: Reason) => {
+    setReason(selectedReason);
+    if (selectedReason === "Other") {
+      setStep(1.2);
+    } else {
+      setUserFlow((prevFlow) => [
+        ...prevFlow,
+        {
+          question:
+            "Hi! I'm Flora, your AI guide here to assist you in discovering the perfect herbal formula tailored to your unique health needs. Before we get started, what are your goals in seeking a personalized Traditional Chinese Medicine herbal formula?",
+          answer: selectedReason,
+        },
+      ]);
+
+      const nextStep =
+        selectedReason === "Address specific health issues" ? 1.1 : 2;
+      setStep(nextStep);
+    }
+  };
+
+  const handleSelectSpecificSymptom = (symptom: SpecificSymptom) => {
+    setSpecificSymptom(symptom);
+    setUserFlow((prevFlow) => [
+      ...prevFlow,
+      {
+        question: "Please select your primary health issue",
+        answer: symptom,
+      },
+    ]);
+    switch (symptom) {
+      case "Pain or discomfort":
+        setStep(1.11);
+        break;
+      case "Other":
+        setStep(1.12);
+        break;
+      default:
+        setStep(2);
+    }
+  };
+
+  const handleSelectSpecificPain = (pain: SpecificPain) => {
+    setSpecificPain(pain);
+
+    if (pain !== "Other") {
+      setUserFlow((prevFlow) => [
+        ...prevFlow,
+        {
+          question:
+            "Do you have any specific pain or discomfort? If yes, please select the type that best describes your condition:",
+          answer: pain,
+        },
+      ]);
+    }
+
+    switch (pain) {
+      case "Headache":
+        setStep(1.111);
+        break;
+      case "Joint pain":
+        setStep(1.121);
+        break;
+      case "Muscle ache":
+        setStep(1.131);
+        break;
+      case "Abdominal pain":
+        setStep(1.141);
+        break;
+      case "Chest discomfort":
+        setStep(1.151);
+        break;
+      case "Back pain":
+        setStep(1.161);
+        break;
+      case "Other":
+        setStep(1.171);
+        break;
+      default:
+        setStep(2);
+    }
+    // setStep(3);
+  };
+
+  const handleSelectHl = (hl: HeadacheLocation) => {
+    setUserFlow((prevFlow) => [
+      ...prevFlow,
+      {
+        question: "Where is your headache primarily located?",
+        answer: hl,
+      },
+    ]);
+    setHl(hl);
+    setStep(1.112);
+  };
+
+  const handleSelectHs = (hs: HeadacheSevere) => {
+    setUserFlow((prevFlow) => [
+      ...prevFlow,
+      {
+        question: "How would you describe your headache?",
+        answer: hs,
+      },
+    ]);
+    setHs(hs);
+    setStep(2);
+  };
+
+  // multiselect option start
+  const [selectedJointOptions, setSelectedJointOptions] = useState<string[]>(
+    []
+  );
+  const handleSelectSpecificJoint = (option: string) => {
+    setSelectedJointOptions((currentOptions) => {
+      if (currentOptions.includes(option)) {
+        // If the option is already selected, remove it
+        return currentOptions.filter(
+          (currentOption) => currentOption !== option
+        );
+      } else {
+        // Otherwise, add the option to the selected list
+        return [...currentOptions, option];
+      }
+    });
+    const optionsString = selectedJointOptions.join(", ");
+    setUserFlow((prevFlow) => [
+      ...prevFlow,
+      {
+        question: "Which joints are affected?",
+        answer: optionsString,
+      },
+    ]);
+  };
+  const handleJointNext = () => {
+    setStep(1.122);
+  };
+  // multiselect option end
+
+  const handleSelectJs = (js: JointSevere) => {
+    setUserFlow((prevFlow) => [
+      ...prevFlow,
+      {
+        question: "How would you describe the pain in your joints?",
+        answer: js,
+      },
+    ]);
+    setJs(js);
+    setStep(2);
+  };
+
+  // multiselect option start
+  const [selectedMuscleOptions, setSelectedMuscleOptions] = useState<string[]>(
+    []
+  );
+  const handleSelectSpecificMuscle = (option: string) => {
+    setSelectedMuscleOptions((currentOptions) => {
+      if (currentOptions.includes(option)) {
+        // If the option is already selected, remove it
+        return currentOptions.filter(
+          (currentOption) => currentOption !== option
+        );
+      } else {
+        // Otherwise, add the option to the selected list
+        return [...currentOptions, option];
+      }
+    });
+    const optionsString = selectedMuscleOptions.join(", ");
+    setUserFlow((prevFlow) => [
+      ...prevFlow,
+      {
+        question: "Where is the muscle ache located?",
+        answer: optionsString,
+      },
+    ]);
+  };
+  const handleMuscleNext = () => {
+    setStep(1.132);
+  };
+  // multiselect option end
+
+  const handleSelectMt = (mt: MuscleTrigger) => {
+    setUserFlow((prevFlow) => [
+      ...prevFlow,
+      {
+        question: "What triggers your muscle ache?",
+        answer: mt,
+      },
+    ]);
+    setMt(mt);
+    setStep(2);
+  };
+
+  const handleSelectAl = (al: AbdominalLocation) => {
+    setUserFlow((prevFlow) => [
+      ...prevFlow,
+      {
+        question: "Can you pinpoint where the abdominal pain is most intense?",
+        answer: al,
+      },
+    ]);
+    setAl(al);
+    setStep(1.141);
+  };
+
+  const handleSelectAs = (as: AbdominalSevere) => {
+    setUserFlow((prevFlow) => [
+      ...prevFlow,
+      {
+        question:
+          "What type of sensation do you experience with your abdominal pain?",
+        answer: as,
+      },
+    ]);
+    setAs(as);
+    setStep(2);
+  };
+
+  const handleSelectCt = (ct: ChestTrigger) => {
+    setUserFlow((prevFlow) => [
+      ...prevFlow,
+      {
+        question: "Does anything specific trigger your chest discomfort?",
+        answer: ct,
+      },
+    ]);
+    setCt(ct);
+    setStep(1.151);
+  };
+
+  const handleSelectCs = (cs: ChestSevere) => {
+    setUserFlow((prevFlow) => [
+      ...prevFlow,
+      {
+        question: "Can you describe the nature of your chest discomfort?",
+        answer: cs,
+      },
+    ]);
+    setCs(cs);
+    setStep(2);
+  };
+
+  const handleSelectBl = (bl: BackLocation) => {
+    setUserFlow((prevFlow) => [
+      ...prevFlow,
+      {
+        question: "Where is your back pain located?",
+        answer: bl,
+      },
+    ]);
+    setBl(bl);
+    setStep(1.161);
+  };
+
+  const handleSelectBs = (bs: BackSevere) => {
+    setUserFlow((prevFlow) => [
+      ...prevFlow,
+      {
+        question: "How would you describe your back pain?",
+        answer: bs,
+      },
+    ]);
+    setBs(bs);
+    setStep(2);
+  };
+
+  const handleOtherQ171Submit = () => {
+    setUserFlow((prevFlow) => [
+      ...prevFlow,
+      {
+        question:
+          "Do you have any specific pain or discomfort? If yes, please select the type that best describes your condition:",
+        answer: otherQ171.trim(),
+      },
+    ]);
+    if (otherQ171.trim() !== "") {
+      setStep(2);
+    }
+  };
+
+  const handleOtherQ1Submit = () => {
+    setUserFlow((prevFlow) => [
+      ...prevFlow,
+      {
+        question:
+          "What are your goals in seeking a personalized Traditional Chinese Medicine herbal formula?",
+        answer: otherQ1.trim(),
+      },
+    ]);
+    if (otherQ1.trim() !== "") {
+      setStep(2);
+    }
+  };
+
+  const handleOtherQ12Submit = () => {
+    setUserFlow((prevFlow) => [
+      ...prevFlow,
+      {
+        question: "Please select your primary health issue:",
+        answer: otherQ12.trim(),
+      },
+    ]);
+    if (otherQ12.trim() !== "") {
+      setStep(2);
+    }
+  };
+
+  const handleSelectAgeGroup = (selectedAge: AgeGroup) => {
+    setUserFlow((prevFlow) => [
+      ...prevFlow,
+      {
+        question: "Please select the age range that best represents you.",
+        answer: selectedAge,
+      },
+    ]);
+    setAgeGroup(selectedAge);
+    setStep(3);
+  };
+
+  const handleSelectGender = (selectedGender: Gender) => {
+    setUserFlow((prevFlow) => [
+      ...prevFlow,
+      {
+        question: "What is your gender identity?",
+        answer: selectedGender,
+      },
+    ]);
+    setGender(selectedGender);
+    setStep(4);
+  };
+
+  const handleSelectMental = (selectedMental: MentalState) => {
+    setUserFlow((prevFlow) => [
+      ...prevFlow,
+      {
+        question:
+          "How would you describe your current mental and emotional state?",
+        answer: selectedMental,
+      },
+    ]);
+    setMentalState(selectedMental);
+    setStep(5);
+  };
+
+  const handleSelectEnergy = (selectedEnergy: Energy) => {
+    setUserFlow((prevFlow) => [
+      ...prevFlow,
+      {
+        question: "Have you noticed any changes in your energy levels lately?",
+        answer: selectedEnergy,
+      },
+    ]);
+    setEnergy(selectedEnergy);
+    setStep(6);
+  };
+
+  const handleSelectSleep = (selectedSleep: Sleep) => {
+    setUserFlow((prevFlow) => [
+      ...prevFlow,
+      {
+        question: "How has your sleep been?",
+        answer: selectedSleep,
+      },
+    ]);
+    setSleep(selectedSleep);
+    setStep(7);
+  };
+
+  const handleSelectDiet = (selectedDiet: Diet) => {
+    setUserFlow((prevFlow) => [
+      ...prevFlow,
+      {
+        question:
+          "Have there been any significant changes in your diet or appetite?",
+        answer: selectedDiet,
+      },
+    ]);
+    setDiet(selectedDiet);
+    setStep(8);
+  };
+
+  const handleSelectMedications = (selectedMedications: Medications) => {
+    setMedications(selectedMedications);
+    selectedMedications == "Yes"
+      ? setStep(8.1)
+      : setUserFlow((prevFlow) => [
+          ...prevFlow,
+          {
+            question: "Do you take any medications regularly?",
+            answer: selectedMedications,
+          },
+        ]);
+    setStep(9);
+  };
+
+  const handleOtherQ81Submit = () => {
+    setUserFlow((prevFlow) => [
+      ...prevFlow,
+      {
+        question: "Do you take any medications regularly?",
+        answer: otherQ81.trim(),
+      },
+    ]);
+    if (otherQ81.trim() !== "") {
+      setStep(9);
+    }
+  };
+
+  //form related questions end
+
   const [images, setImages] = useState<File[]>([]);
   const [message, setMessage] = useState("");
 
@@ -154,6 +599,9 @@ function ChatContainer() {
         },
       ],
     };
+    const userFlowString = userFlow
+      .map((entry) => `${entry.question} Answer: ${entry.answer}`)
+      .join("; ");
 
     try {
       if (images.length === 0) {
@@ -167,6 +615,16 @@ function ChatContainer() {
             "/api/openai",
             {
               messages: [
+                // ...messages,
+                {
+                  role: "assistant",
+                  content: [
+                    {
+                      type: "text",
+                      text: userFlowString,
+                    },
+                  ],
+                },
                 {
                   role: "user",
                   content: [
@@ -202,6 +660,16 @@ function ChatContainer() {
       } else {
         const Imgpayload = {
           messages: [
+            // ...messages,
+            {
+              role: "assistant",
+              content: [
+                {
+                  type: "text",
+                  text: userFlowString,
+                },
+              ],
+            },
             {
               role: "user",
               content: [
@@ -273,240 +741,6 @@ function ChatContainer() {
 
     return `<pre style="white-space: pre-wrap;">${content}</pre>`;
   }
-
-  // form related questions
-  const [userFlow, setUserFlow] = useState<
-    Array<{ question: string; answer: string }>
-  >([]);
-  const [step, setStep] = useState<number>(1);
-  const [reason, setReason] = useState<Reason | "">("");
-  const [specificSymptom, setSpecificSymptom] = useState<SpecificSymptom | "">(
-    ""
-  );
-  const [specificPain, setSpecificPain] = useState<SpecificPain | "">("");
-  const [hl, setHl] = useState<HeadacheLocation | "">("");
-  const [hs, setHs] = useState<HeadacheSevere | "">("");
-  const [js, setJs] = useState<JointSevere | "">("");
-  const [mt, setMt] = useState<MuscleTrigger | "">("");
-  const [al, setAl] = useState<AbdominalLocation | "">("");
-  const [as, setAs] = useState<AbdominalSevere | "">("");
-  const [ct, setCt] = useState<ChestTrigger | "">("");
-  const [cs, setCs] = useState<ChestSevere | "">("");
-  const [bl, setBl] = useState<BackLocation | "">("");
-  const [bs, setBs] = useState<BackSevere | "">("");
-  const [otherQ171, setOtherQ171] = useState<string>(""); //q171 other
-
-  const [ageGroup, setAgeGroup] = useState<AgeGroup | "">("");
-  const [gender, setGender] = useState<Gender | "">("");
-  const [mentalState, setMentalState] = useState<MentalState | "">("");
-  const [energy, setEnergy] = useState<Energy | "">("");
-
-  const [otherQ1, setOtherQ1] = useState<string>(""); //q1 other
-  const [otherQ12, setOtherQ12] = useState<string>(""); //q12 other
-
-  const handleSelectReason = (selectedReason: Reason) => {
-    setReason(selectedReason);
-    if (selectedReason === "Other") {
-      setStep(1.2);
-    } else {
-      setUserFlow((prevFlow) => [
-        ...prevFlow,
-        {
-          question:
-            "Hi! I'm Flora, your AI guide here to assist you in discovering the perfect herbal formula tailored to your unique health needs. Before we get started, could you tell me a bit about what brought you here today?",
-          answer: selectedReason,
-        },
-      ]);
-      console.log(userFlow);
-
-      const nextStep =
-        selectedReason === "Address specific health issues" ? 1.1 : 2;
-      setStep(nextStep);
-    }
-  };
-
-  const handleSelectSpecificSymptom = (symptom: SpecificSymptom) => {
-    setSpecificSymptom(symptom);
-    switch (symptom) {
-      case "Pain or discomfort":
-        setStep(1.11);
-        break;
-      case "Other":
-        setStep(1.12);
-        break;
-      default:
-        setStep(2);
-    }
-  };
-
-  const handleSelectSpecificPain = (pain: SpecificPain) => {
-    setSpecificPain(pain);
-    switch (pain) {
-      case "Headache":
-        setStep(1.111);
-        break;
-      case "Joint pain":
-        setStep(1.121);
-        break;
-      case "Muscle ache":
-        setStep(1.131);
-        break;
-      case "Abdominal pain":
-        setStep(1.141);
-        break;
-      case "Chest discomfort":
-        setStep(1.151);
-        break;
-      case "Back pain":
-        setStep(1.161);
-        break;
-      case "Other":
-        setStep(1.171);
-        break;
-      default:
-        setStep(2);
-    }
-    // setStep(3);
-  };
-
-  const handleSelectHl = (hl: HeadacheLocation) => {
-    setHl(hl);
-    setStep(1.112);
-  };
-
-  const handleSelectHs = (hs: HeadacheSevere) => {
-    setHs(hs);
-
-    // setStep(3);
-  };
-
-  // multiselect option start
-  const [selectedJointOptions, setSelectedJointOptions] = useState<string[]>(
-    []
-  );
-  const handleSelectSpecificJoint = (option: string) => {
-    setSelectedJointOptions((currentOptions) => {
-      if (currentOptions.includes(option)) {
-        // If the option is already selected, remove it
-        return currentOptions.filter(
-          (currentOption) => currentOption !== option
-        );
-      } else {
-        // Otherwise, add the option to the selected list
-        return [...currentOptions, option];
-      }
-    });
-  };
-  const handleJointNext = () => {
-    setStep(1.122);
-  };
-  // multiselect option end
-
-  const handleSelectJs = (js: JointSevere) => {
-    setJs(js);
-    // setStep(3);
-  };
-
-  // multiselect option start
-  const [selectedMuscleOptions, setSelectedMuscleOptions] = useState<string[]>(
-    []
-  );
-  const handleSelectSpecificMuscle = (option: string) => {
-    setSelectedMuscleOptions((currentOptions) => {
-      if (currentOptions.includes(option)) {
-        // If the option is already selected, remove it
-        return currentOptions.filter(
-          (currentOption) => currentOption !== option
-        );
-      } else {
-        // Otherwise, add the option to the selected list
-        return [...currentOptions, option];
-      }
-    });
-  };
-  const handleMuscleNext = () => {
-    setStep(1.132);
-  };
-  // multiselect option end
-
-  const handleSelectMt = (mt: MuscleTrigger) => {
-    setMt(mt);
-    // setStep(3);
-  };
-
-  const handleSelectAl = (al: AbdominalLocation) => {
-    setAl(al);
-
-    // setStep(3);
-  };
-
-  const handleSelectAs = (as: AbdominalSevere) => {
-    setAs(as);
-
-    // setStep(3);
-  };
-
-  const handleSelectCt = (ct: ChestTrigger) => {
-    setCt(ct);
-
-    // setStep(3);
-  };
-
-  const handleSelectCs = (cs: ChestSevere) => {
-    setCs(cs);
-
-    // setStep(3);
-  };
-
-  const handleSelectBl = (bl: BackLocation) => {
-    setBl(bl);
-
-    // setStep(3);
-  };
-
-  const handleSelectBs = (bs: BackSevere) => {
-    setBs(bs);
-
-    // setStep(3);
-  };
-
-  const handleOtherQ171Submit = () => {
-    if (otherQ171.trim() !== "") {
-      setStep(2);
-    }
-  };
-
-  const handleOtherQ1Submit = () => {
-    if (otherQ1.trim() !== "") {
-      setStep(2);
-    }
-  };
-
-  const handleOtherQ12Submit = () => {
-    if (otherQ12.trim() !== "") {
-      setStep(2);
-    }
-  };
-
-  const handleSelectAgeGroup = (age: AgeGroup) => {
-    setAgeGroup(age);
-    setStep(3);
-  };
-
-  const handleSelectGender = (selectedGender: Gender) => {
-    setGender(selectedGender);
-    setStep(4);
-  };
-
-  const handleSelectMental = (selectedMental: MentalState) => {
-    setMentalState(selectedMental);
-    setStep(5);
-  };
-
-  const handleSelectEnergy = (selectedEnergy: Energy) => {
-    setEnergy(selectedEnergy);
-    setStep(6);
-  };
 
   return (
     <div className="flex flex-col h-full">
@@ -938,108 +1172,176 @@ function ChatContainer() {
 
         {step === 6 && (
           <>
+            <Question text="How has your sleep been?" />
+            {(
+              [
+                "Regular and restful",
+                "Difficulty falling asleep",
+                "Waking up frequently during the night",
+                "Feeling tired after waking up",
+              ] as Sleep[]
+            ).map((option) => (
+              <Option key={option} onClick={() => handleSelectSleep(option)}>
+                {option}
+              </Option>
+            ))}
+          </>
+        )}
+
+        {step === 7 && (
+          <>
+            <Question text="Have there been any significant changes in your diet or appetite?" />
+            {(
+              [
+                "Eating more than usual",
+                "Eating less than usual",
+                "Cravings for specific foods",
+                "Changes in appetite but not in eating habits",
+                "No significant changes",
+              ] as Diet[]
+            ).map((option) => (
+              <Option key={option} onClick={() => handleSelectDiet(option)}>
+                {option}
+              </Option>
+            ))}
+          </>
+        )}
+
+        {step === 8 && (
+          <>
+            <Question text="Do you take any medications regularly?" />
+            {(["Yes", "No"] as Medications[]).map((option) => (
+              <Option
+                key={option}
+                onClick={() => handleSelectMedications(option)}
+              >
+                {option}
+              </Option>
+            ))}
+          </>
+        )}
+
+        {step === 8.1 && (
+          <>
+            <Question text="Please specify which medications you take" />
+            <input
+              type="text"
+              value={otherQ81}
+              onChange={(e) => setOtherQ81(e.target.value)}
+              className="my-2 border border-gray-400 rounded p-2 w-full outline-none focus:outline-none"
+              placeholder="Type here..."
+            />
+            <Option onClick={handleOtherQ81Submit}>Submit</Option>
+          </>
+        )}
+
+        {step === 9 && (
+          <>
             <Question text="Thank you for completing the questionnaire. We will now assist you with personalized herbal formula recommendations." />
-            {/* Here, you could add a call to action or navigation to another page */}
           </>
         )}
       </div>
 
-      <div className="flex-1 overflow-y-auto px-2 py-4">
-        {messages.map((message, idx) => (
-          <div
-            key={idx}
-            className={`flex mb-4 ${
-              message.role === "user" ? "justify-end" : "justify-start"
-            }`}
-          >
-            <div
-              className={`rounded-md p-2 max-w-xs md:max-w-xl ${
-                message.role === "user"
-                  ? "bg-green text-white"
-                  : "bg-gray-200 text-black"
-              }`}
-            >
-              {/* Ensure that content is an array before mapping */}
-              {Array.isArray(message.content) ? (
-                message.content.map((content, index) => {
-                  if (content.type === "text") {
-                    return (
-                      <pre
-                        key={index}
-                        dangerouslySetInnerHTML={{
-                          __html: formatMessage(content.text),
-                        }}
-                        className="text-sm"
-                      />
-                    );
-                  } else if (content.type === "image_url") {
-                    return (
-                      <img
-                        key={index}
-                        src={content.image_url.url}
-                        alt={`Uploaded by ${message.role}`}
-                        className="h-16 w-16 object-cover rounded-lg"
-                      />
-                    );
-                  }
-                })
-              ) : (
-                // If message.content is not an array, render it as a string
-                <p className="text-sm">{message.content}</p>
-              )}
-            </div>
+      {step === 9 && (
+        <>
+          <div className="flex-1 overflow-y-auto px-2 py-2">
+            {messages.map((message, idx) => (
+              <div
+                key={idx}
+                className={`flex mb-4 ${
+                  message.role === "user" ? "justify-end" : "justify-start"
+                }`}
+              >
+                <div
+                  className={`rounded-md p-2 max-w-xs md:max-w-xl ${
+                    message.role === "user"
+                      ? "bg-green text-white"
+                      : "bg-gray-200 text-black"
+                  }`}
+                >
+                  {/* Ensure that content is an array before mapping */}
+                  {Array.isArray(message.content) ? (
+                    message.content.map((content, index) => {
+                      if (content.type === "text") {
+                        return (
+                          <pre
+                            key={index}
+                            dangerouslySetInnerHTML={{
+                              __html: formatMessage(content.text),
+                            }}
+                            className="text-sm"
+                          />
+                        );
+                      } else if (content.type === "image_url") {
+                        return (
+                          <img
+                            key={index}
+                            src={content.image_url.url}
+                            alt={`Uploaded by ${message.role}`}
+                            className="h-16 w-16 object-cover rounded-lg"
+                          />
+                        );
+                      }
+                    })
+                  ) : (
+                    // If message.content is not an array, render it as a string
+                    <p className="text-sm">{message.content}</p>
+                  )}
+                </div>
+              </div>
+            ))}
           </div>
-        ))}
-      </div>
 
-      <div className="p-4">
-        {images.length > 0 && (
-          <div className="relative inline-block">
-            <img
-              src={URL.createObjectURL(images[0])}
-              alt="upload-preview"
-              className="h-16 w-16 object-cover rounded-lg mr-2"
-            />
+          <div className="p-4">
+            {images.length > 0 && (
+              <div className="relative inline-block">
+                <img
+                  src={URL.createObjectURL(images[0])}
+                  alt="upload-preview"
+                  className="h-16 w-16 object-cover rounded-lg mr-2"
+                />
+                <button
+                  onClick={() => removeImage(0)} // Adjusted to always remove the first image
+                  className="w-5 h-5 absolute top-0 right-0 bg-red-500 text-white rounded-full text-xs"
+                >
+                  &times;
+                </button>
+              </div>
+            )}
+          </div>
+
+          <div className="flex items-center space-x-2 py-4 px-2 bg-white">
+            <label className="flex justify-center items-center p-2 rounded-full bg-gray-200 text-gray-500 w-10 h-10 cursor-pointer">
+              <FontAwesomeIcon icon={faPaperclip} className="h-5 w-5" />
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleImageChange}
+                className="hidden"
+                disabled={isSending}
+              />
+            </label>
+            <textarea
+              className="flex-1 border-solid border border-gray-600 rounded-md p-2 bg-gray-200 text-gray-800 outline-none focus:outline-none"
+              placeholder="Type your message here..."
+              rows={1}
+              value={message}
+              onChange={handleMessageChange}
+            ></textarea>
             <button
-              onClick={() => removeImage(0)} // Adjusted to always remove the first image
-              className="w-5 h-5 absolute top-0 right-0 bg-red-500 text-white rounded-full text-xs"
+              className="flex justify-center items-center p-2 rounded-full bg-green text-white w-10 h-10"
+              onClick={sendMessage}
+              disabled={isSending}
             >
-              &times;
+              {isSending ? (
+                <FontAwesomeIcon icon={faSpinner} className="h-5 w-5 fa-spin" />
+              ) : (
+                <FontAwesomeIcon icon={faArrowRight} className="h-5 w-5" />
+              )}
             </button>
           </div>
-        )}
-      </div>
-
-      <div className="flex items-center space-x-2 py-4 px-2 bg-white">
-        <label className="flex justify-center items-center p-2 rounded-full bg-gray-200 text-gray-500 w-10 h-10 cursor-pointer">
-          <FontAwesomeIcon icon={faPaperclip} className="h-5 w-5" />
-          <input
-            type="file"
-            accept="image/*"
-            onChange={handleImageChange}
-            className="hidden"
-            disabled={isSending}
-          />
-        </label>
-        <textarea
-          className="flex-1 border-solid border border-gray-600 rounded-md p-2 bg-gray-200 text-gray-800 outline-none focus:outline-none"
-          placeholder="Type your message here..."
-          rows={1}
-          value={message}
-          onChange={handleMessageChange}
-        ></textarea>
-        <button
-          className="flex justify-center items-center p-2 rounded-full bg-green text-white w-10 h-10"
-          onClick={sendMessage}
-          disabled={isSending}
-        >
-          {isSending ? (
-            <FontAwesomeIcon icon={faSpinner} className="h-5 w-5 fa-spin" />
-          ) : (
-            <FontAwesomeIcon icon={faArrowRight} className="h-5 w-5" />
-          )}
-        </button>
-      </div>
+        </>
+      )}
     </div>
   );
 }
