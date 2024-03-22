@@ -118,7 +118,8 @@ export type Sleep =
   | "Regular and restful"
   | "Difficulty falling asleep"
   | "Waking up frequently during the night"
-  | "Feeling tired after waking up";
+  | "Feeling tired after waking up"
+  | "Other";
 
 export type Diet =
   | "Eating more than usual"
@@ -127,7 +128,7 @@ export type Diet =
   | "Changes in appetite but not in eating habits"
   | "No significant changes";
 
-export type Medications = "Yes" | "No";
+export type Medications = "Yes" | "Prefer not to say" | "No";
 
 export interface IOptionProps {
   onClick: () => void;

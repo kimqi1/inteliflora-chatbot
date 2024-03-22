@@ -92,6 +92,8 @@ function ChatContainer() {
   const [otherQ1, setOtherQ1] = useState<string>(""); //q1 other
   const [otherQ171, setOtherQ171] = useState<string>(""); //q171 other
   const [otherQ12, setOtherQ12] = useState<string>(""); //q12 other
+  const [otherQ41, setOtherQ41] = useState<string>(""); //q41 other
+  const [otherQ61, setOtherQ61] = useState<string>(""); //q81 other
   const [otherQ81, setOtherQ81] = useState<string>(""); //q81 other
 
   const handleSelectReason = (selectedReason: Reason) => {
@@ -399,6 +401,32 @@ function ChatContainer() {
     }
   };
 
+  const handleOtherQ41Submit = () => {
+    setUserFlow((prevFlow) => [
+      ...prevFlow,
+      {
+        question: "Please specify your mental state",
+        answer: otherQ41.trim(),
+      },
+    ]);
+    if (otherQ41.trim() !== "") {
+      setStep(5);
+    }
+  };
+
+  const handleOtherQ61Submit = () => {
+    setUserFlow((prevFlow) => [
+      ...prevFlow,
+      {
+        question: "Please specify your sleep state",
+        answer: otherQ61.trim(),
+      },
+    ]);
+    if (otherQ61.trim() !== "") {
+      setStep(7);
+    }
+  };
+
   const handleSelectAgeGroup = (selectedAge: AgeGroup) => {
     setUserFlow((prevFlow) => [
       ...prevFlow,
@@ -424,16 +452,19 @@ function ChatContainer() {
   };
 
   const handleSelectMental = (selectedMental: MentalState) => {
-    setUserFlow((prevFlow) => [
-      ...prevFlow,
-      {
-        question:
-          "How would you describe your current mental and emotional state?",
-        answer: selectedMental,
-      },
-    ]);
+    if (selectedMental !== "Other") {
+      setUserFlow((prevFlow) => [
+        ...prevFlow,
+        {
+          question:
+            "How would you describe your current mental and emotional state?",
+          answer: selectedMental,
+        },
+      ]);
+    }
+
     setMentalState(selectedMental);
-    setStep(5);
+    selectedMental === "Other" ? setStep(4.1) : setStep(5);
   };
 
   const handleSelectEnergy = (selectedEnergy: Energy) => {
@@ -449,15 +480,17 @@ function ChatContainer() {
   };
 
   const handleSelectSleep = (selectedSleep: Sleep) => {
-    setUserFlow((prevFlow) => [
-      ...prevFlow,
-      {
-        question: "How has your sleep been?",
-        answer: selectedSleep,
-      },
-    ]);
+    if (selectedSleep !== "Other") {
+      setUserFlow((prevFlow) => [
+        ...prevFlow,
+        {
+          question: "How has your sleep been?",
+          answer: selectedSleep,
+        },
+      ]);
+    }
     setSleep(selectedSleep);
-    setStep(7);
+    selectedSleep === "Other" ? setStep(6.1) : setStep(7);
   };
 
   const handleSelectDiet = (selectedDiet: Diet) => {
@@ -477,14 +510,14 @@ function ChatContainer() {
     setMedications(selectedMedications);
     selectedMedications == "Yes"
       ? setStep(8.1)
-      : setUserFlow((prevFlow) => [
+      : (setUserFlow((prevFlow) => [
           ...prevFlow,
           {
             question: "Do you take any medications regularly?",
             answer: selectedMedications,
           },
-        ]);
-    setStep(9);
+        ]),
+        setStep(9));
   };
 
   const handleOtherQ81Submit = () => {
@@ -547,7 +580,26 @@ function ChatContainer() {
     setMessage(e.target.value);
   };
 
+  const [hasAssistantMessageBeenAdded, setHasAssistantMessageBeenAdded] =
+    useState(false);
   const sendMessage = async () => {
+    const userFlowString = userFlow
+      .map((entry) => `${entry.question} Answer: ${entry.answer}`)
+      .join("; ");
+    if (!hasAssistantMessageBeenAdded) {
+      const assistantMessage: Message = {
+        role: "assistant",
+        content: [
+          {
+            type: "text",
+            text: `User health data is below ${userFlowString}`,
+          },
+        ],
+      };
+      setMessages((prevMessages) => [...prevMessages, assistantMessage]);
+      setHasAssistantMessageBeenAdded(true);
+    }
+
     setIsSending(true); // Disable send and upload buttons
 
     // Create the content array for the new user message
@@ -599,11 +651,15 @@ function ChatContainer() {
         },
       ],
     };
-    const userFlowString = userFlow
-      .map((entry) => `${entry.question} Answer: ${entry.answer}`)
-      .join("; ");
 
     try {
+      // Calculate start index to keep the last 7 messages before adding new ones
+      const startIndex = Math.max(messages.length - 7, 0);
+      // Slice the messages array to keep only the last 7 messages
+      let trimmedMessages = messages.slice(startIndex);
+
+      console.log(trimmedMessages);
+
       if (images.length === 0) {
         const textContentItem = payload.messages[0].content.find(
           (item) => item.type === "text"
@@ -615,16 +671,7 @@ function ChatContainer() {
             "/api/openai",
             {
               messages: [
-                // ...messages,
-                {
-                  role: "assistant",
-                  content: [
-                    {
-                      type: "text",
-                      text: userFlowString,
-                    },
-                  ],
-                },
+                ...trimmedMessages,
                 {
                   role: "user",
                   content: [
@@ -660,16 +707,7 @@ function ChatContainer() {
       } else {
         const Imgpayload = {
           messages: [
-            // ...messages,
-            {
-              role: "assistant",
-              content: [
-                {
-                  type: "text",
-                  text: userFlowString,
-                },
-              ],
-            },
+            ...trimmedMessages,
             {
               role: "user",
               content: [
@@ -1153,6 +1191,20 @@ function ChatContainer() {
           </>
         )}
 
+        {step === 4.1 && (
+          <>
+            <Question text="Please specify your mental state" />
+            <input
+              type="text"
+              value={otherQ41}
+              onChange={(e) => setOtherQ41(e.target.value)}
+              className="my-2 border border-gray-400 rounded p-2 w-full outline-none focus:outline-none"
+              placeholder="Type here..."
+            />
+            <Option onClick={handleOtherQ41Submit}>Submit</Option>
+          </>
+        )}
+
         {step === 5 && (
           <>
             <Question text="Have you noticed any changes in your energy levels lately?" />
@@ -1179,12 +1231,27 @@ function ChatContainer() {
                 "Difficulty falling asleep",
                 "Waking up frequently during the night",
                 "Feeling tired after waking up",
+                "Other",
               ] as Sleep[]
             ).map((option) => (
               <Option key={option} onClick={() => handleSelectSleep(option)}>
                 {option}
               </Option>
             ))}
+          </>
+        )}
+
+        {step === 6.1 && (
+          <>
+            <Question text="Please specify your sleep state" />
+            <input
+              type="text"
+              value={otherQ61}
+              onChange={(e) => setOtherQ61(e.target.value)}
+              className="my-2 border border-gray-400 rounded p-2 w-full outline-none focus:outline-none"
+              placeholder="Type here..."
+            />
+            <Option onClick={handleOtherQ61Submit}>Submit</Option>
           </>
         )}
 
@@ -1207,17 +1274,54 @@ function ChatContainer() {
           </>
         )}
 
-        {step === 8 && (
+        {/* {step === 7.1 && (
           <>
-            <Question text="Do you take any medications regularly?" />
-            {(["Yes", "No"] as Medications[]).map((option) => (
-              <Option
-                key={option}
-                onClick={() => handleSelectMedications(option)}
-              >
+            <Question text="What type of foods have you been craving" />
+            {(
+              [
+                "Sweet",
+                "Salty",
+                "Bitter",
+                "Sour",
+                "Pungent",
+                "Other "
+
+              ] as Diet[]
+            ).map((option) => (
+              <Option key={option} onClick={() => handleSelectDiet(option)}>
                 {option}
               </Option>
             ))}
+          </>
+        )} */}
+
+        {step === 7.11 && (
+          <>
+            <Question text="Please specify which medications you take" />
+            <input
+              type="text"
+              value={otherQ81}
+              onChange={(e) => setOtherQ81(e.target.value)}
+              className="my-2 border border-gray-400 rounded p-2 w-full outline-none focus:outline-none"
+              placeholder="Type here..."
+            />
+            <Option onClick={handleOtherQ81Submit}>Submit</Option>
+          </>
+        )}
+
+        {step === 8 && (
+          <>
+            <Question text="Do you take any medications regularly?" />
+            {(["Yes", "No", "Prefer not to say"] as Medications[]).map(
+              (option) => (
+                <Option
+                  key={option}
+                  onClick={() => handleSelectMedications(option)}
+                >
+                  {option}
+                </Option>
+              )
+            )}
           </>
         )}
 
@@ -1245,51 +1349,56 @@ function ChatContainer() {
       {step === 9 && (
         <>
           <div className="flex-1 overflow-y-auto px-2 py-2">
-            {messages.map((message, idx) => (
-              <div
-                key={idx}
-                className={`flex mb-4 ${
-                  message.role === "user" ? "justify-end" : "justify-start"
-                }`}
-              >
+            {messages.map((message, idx) => {
+              if (message.role === "assistant") {
+                return null; // Renders nothing for "assistant" role
+              }
+              return (
                 <div
-                  className={`rounded-md p-2 max-w-xs md:max-w-xl ${
-                    message.role === "user"
-                      ? "bg-green text-white"
-                      : "bg-gray-200 text-black"
+                  key={idx}
+                  className={`flex mb-4 ${
+                    message.role === "user" ? "justify-end" : "justify-start"
                   }`}
                 >
-                  {/* Ensure that content is an array before mapping */}
-                  {Array.isArray(message.content) ? (
-                    message.content.map((content, index) => {
-                      if (content.type === "text") {
-                        return (
-                          <pre
-                            key={index}
-                            dangerouslySetInnerHTML={{
-                              __html: formatMessage(content.text),
-                            }}
-                            className="text-sm"
-                          />
-                        );
-                      } else if (content.type === "image_url") {
-                        return (
-                          <img
-                            key={index}
-                            src={content.image_url.url}
-                            alt={`Uploaded by ${message.role}`}
-                            className="h-16 w-16 object-cover rounded-lg"
-                          />
-                        );
-                      }
-                    })
-                  ) : (
-                    // If message.content is not an array, render it as a string
-                    <p className="text-sm">{message.content}</p>
-                  )}
+                  <div
+                    className={`rounded-md p-2 max-w-xs md:max-w-xl ${
+                      message.role === "user"
+                        ? "bg-green text-white"
+                        : "bg-gray-200 text-black"
+                    }`}
+                  >
+                    {/* Ensure that content is an array before mapping */}
+                    {Array.isArray(message.content) ? (
+                      message.content.map((content, index) => {
+                        if (content.type === "text") {
+                          return (
+                            <pre
+                              key={index}
+                              dangerouslySetInnerHTML={{
+                                __html: formatMessage(content.text),
+                              }}
+                              className="text-sm"
+                            />
+                          );
+                        } else if (content.type === "image_url") {
+                          return (
+                            <img
+                              key={index}
+                              src={content.image_url.url}
+                              alt={`Uploaded by ${message.role}`}
+                              className="h-16 w-16 object-cover rounded-lg"
+                            />
+                          );
+                        }
+                      })
+                    ) : (
+                      // If message.content is not an array, render it as a string
+                      <p className="text-sm">{message.content}</p>
+                    )}
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
 
           <div className="p-4">
