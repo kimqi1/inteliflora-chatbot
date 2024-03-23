@@ -34,7 +34,7 @@ const OPENAI_URL = "https://api.openai.com/v1/chat/completions" as const;
 
 export async function POST(request: Request) {
   const requestBody = await request.json();
-
+  console.log(requestBody);
   const parsedRequest = chatRequestSchema.safeParse(requestBody);
 
   if (!parsedRequest.success) {
@@ -58,7 +58,7 @@ export async function POST(request: Request) {
     }),
   }));
 
-  console.log(clonedMessages)
+  console.log(clonedMessages);
 
   const payload = {
     model: "gpt-4-vision-preview",

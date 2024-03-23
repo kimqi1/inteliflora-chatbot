@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect,useRef } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faPaperclip,
@@ -579,6 +579,7 @@ function ChatContainer() {
   ]);
   const [isSending, setIsSending] = useState(false);
 
+  const fileInputRef = useRef(null);
   // const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
   //   if (e.target.files) {
   //     const filesArray = Array.from(e.target.files);
@@ -591,17 +592,21 @@ function ChatContainer() {
   //   }
   // };
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    console.log(e.target.files);
     if (e.target.files && e.target.files.length > 0) {
       // Take only the first file, ignoring any additional files
       const newImage = e.target.files[0];
 
       // Set the images state to an array containing just this new image
       setImages([newImage]);
+      e.target.value = "";
     }
   };
 
   const removeImage = (index: number) => {
     setImages(images.filter((_, i) => i !== index));
+    const fileInput = document.getElementById("file-input") as HTMLInputElement;
+    if (fileInput) fileInput.value = "";
   };
 
   const handleMessageChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -611,175 +616,177 @@ function ChatContainer() {
   const [hasAssistantMessageBeenAdded, setHasAssistantMessageBeenAdded] =
     useState(false);
   const sendMessage = async () => {
-    const userFlowString = userFlow
-      .map((entry) => `${entry.question} Answer: ${entry.answer}`)
-      .join("; ");
-    if (!hasAssistantMessageBeenAdded) {
-      const assistantMessage: Message = {
-        role: "assistant",
-        content: [
+    if (images.length > 0 || message !== "") {
+      const userFlowString = userFlow
+        .map((entry) => `${entry.question} Answer: ${entry.answer}`)
+        .join("; ");
+      if (!hasAssistantMessageBeenAdded) {
+        const assistantMessage: Message = {
+          role: "assistant",
+          content: [
+            {
+              type: "text",
+              text: `User health data is below ${userFlowString}`,
+            },
+          ],
+        };
+        setMessages((prevMessages) => [...prevMessages, assistantMessage]);
+        setHasAssistantMessageBeenAdded(true);
+      }
+
+      setIsSending(true); // Disable send and upload buttons
+
+      // Create the content array for the new user message
+      const newUserMessageContent: MessageContent[] = [
+        {
+          type: "text" as const,
+          text: message,
+        },
+        ...images.map((file) => ({
+          type: "image_url" as const,
+          // Temporary URLs for rendering - will be replaced by the backend response
+          image_url: { url: URL.createObjectURL(file) },
+        })),
+      ];
+
+      // Create a new user message object
+      const newUserMessage: Message = {
+        role: "user",
+        content: newUserMessageContent as (TextContent | ImageContent)[],
+      };
+
+      // Update the messages state to include the new user message
+      setMessages((prevMessages) => [...prevMessages, newUserMessage]);
+
+      // Convert images to base64 strings for the backend
+      const imagePromises: any = images.map((file) => {
+        return new Promise<string>((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(reader.result as string);
+          reader.onerror = (error) => reject(error);
+          reader.readAsDataURL(file);
+        });
+      });
+
+      const imageBase64Strings = await Promise.all(imagePromises);
+
+      // Construct the payload with base64 strings
+      const payload = {
+        messages: [
           {
-            type: "text",
-            text: `User health data is below ${userFlowString}`,
+            role: "user",
+            content: [
+              { type: "text", text: message },
+              ...imageBase64Strings.map((base64) => ({
+                type: "image_url",
+                image_url: { url: base64 },
+              })),
+            ],
           },
         ],
       };
-      setMessages((prevMessages) => [...prevMessages, assistantMessage]);
-      setHasAssistantMessageBeenAdded(true);
-    }
 
-    setIsSending(true); // Disable send and upload buttons
+      try {
+        // Calculate start index to keep the last 7 messages before adding new ones
+        const startIndex = Math.max(messages.length - 7, 0);
+        // Slice the messages array to keep only the last 7 messages
+        let trimmedMessages = messages.slice(startIndex);
 
-    // Create the content array for the new user message
-    const newUserMessageContent: MessageContent[] = [
-      {
-        type: "text" as const,
-        text: message,
-      },
-      ...images.map((file) => ({
-        type: "image_url" as const,
-        // Temporary URLs for rendering - will be replaced by the backend response
-        image_url: { url: URL.createObjectURL(file) },
-      })),
-    ];
+        console.log(trimmedMessages);
 
-    // Create a new user message object
-    const newUserMessage: Message = {
-      role: "user",
-      content: newUserMessageContent as (TextContent | ImageContent)[],
-    };
-
-    // Update the messages state to include the new user message
-    setMessages((prevMessages) => [...prevMessages, newUserMessage]);
-
-    // Convert images to base64 strings for the backend
-    const imagePromises: any = images.map((file) => {
-      return new Promise<string>((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve(reader.result as string);
-        reader.onerror = (error) => reject(error);
-        reader.readAsDataURL(file);
-      });
-    });
-
-    const imageBase64Strings = await Promise.all(imagePromises);
-
-    // Construct the payload with base64 strings
-    const payload = {
-      messages: [
-        {
-          role: "user",
-          content: [
-            { type: "text", text: message },
-            ...imageBase64Strings.map((base64) => ({
-              type: "image_url",
-              image_url: { url: base64 },
-            })),
-          ],
-        },
-      ],
-    };
-
-    try {
-      // Calculate start index to keep the last 7 messages before adding new ones
-      const startIndex = Math.max(messages.length - 7, 0);
-      // Slice the messages array to keep only the last 7 messages
-      let trimmedMessages = messages.slice(startIndex);
-
-      console.log(trimmedMessages);
-
-      if (images.length === 0) {
-        const textContentItem = payload.messages[0].content.find(
-          (item) => item.type === "text"
-        );
-
-        if (textContentItem && "text" in textContentItem) {
-          const textMessage = textContentItem.text;
-          const response = await axios.post(
-            "/api/openai",
-            {
-              messages: [
-                ...trimmedMessages,
-                {
-                  role: "user",
-                  content: [
-                    {
-                      type: "text",
-                      text: textMessage, // Ensure textMessage is defined and contains the message you want to send
-                    },
-                  ],
-                },
-              ],
-            },
-            {
-              headers: {
-                "Content-Type": "application/json",
-              },
-            }
+        if (images.length === 0) {
+          const textContentItem = payload.messages[0].content.find(
+            (item) => item.type === "text"
           );
 
-          const result = await response.data;
-          const finalRes = result.message.content;
-          console.log(finalRes);
-          const newMessage: Message = {
-            // Explicitly declaring newMessage as type Message
-            role: "system",
-            content: [{ type: "text", text: finalRes }],
-          };
+          if (textContentItem && "text" in textContentItem) {
+            const textMessage = textContentItem.text;
+            const response = await axios.post(
+              "/api/openai",
+              {
+                messages: [
+                  ...trimmedMessages,
+                  {
+                    role: "user",
+                    content: [
+                      {
+                        type: "text",
+                        text: textMessage, // Ensure textMessage is defined and contains the message you want to send
+                      },
+                    ],
+                  },
+                ],
+              },
+              {
+                headers: {
+                  "Content-Type": "application/json",
+                },
+              }
+            );
 
+            const result = await response.data;
+            const finalRes = result.message.content;
+            console.log(finalRes);
+            const newMessage: Message = {
+              // Explicitly declaring newMessage as type Message
+              role: "system",
+              content: [{ type: "text", text: finalRes }],
+            };
+
+            setMessages((prevMessages: Message[]) => [
+              ...prevMessages,
+              newMessage as Message,
+            ]); // Type assertion here
+          }
+        } else {
+          const Imgpayload = {
+            messages: [
+              ...trimmedMessages,
+              {
+                role: "user",
+                content: [
+                  {
+                    type: "text",
+                    text:
+                      "Analyze image and try to find the possible disease." +
+                      message,
+                  },
+                  ...imageBase64Strings.map((base64) => ({
+                    type: "image_url",
+                    image_url: { url: base64 },
+                  })),
+                ],
+              },
+            ],
+          };
+          // Send the message to the backend
+          const response1 = await axios.post("/api/openai", Imgpayload);
+
+          if (!response1.data.success) {
+            toast.error(response1.data.error);
+          }
+
+          const textMessage = response1.data.message.content;
+
+          const newMessage: Message = {
+            role: "system",
+            content: [{ type: "text", text: textMessage }],
+          };
+          console.log(newMessage);
           setMessages((prevMessages: Message[]) => [
             ...prevMessages,
             newMessage as Message,
           ]); // Type assertion here
         }
-      } else {
-        const Imgpayload = {
-          messages: [
-            ...trimmedMessages,
-            {
-              role: "user",
-              content: [
-                {
-                  type: "text",
-                  text:
-                    "Analyze image and try to find the possible disease." +
-                    message,
-                },
-                ...imageBase64Strings.map((base64) => ({
-                  type: "image_url",
-                  image_url: { url: base64 },
-                })),
-              ],
-            },
-          ],
-        };
-        // Send the message to the backend
-        const response1 = await axios.post("/api/openai", Imgpayload);
-
-        if (!response1.data.success) {
-          toast.error(response1.data.error);
-        }
-
-        const textMessage = { ...response1.data.message };
-
-        const newMessage: Message = {
-          role: "system",
-          content: [{ type: "text", text: textMessage }],
-        };
-
-        setMessages((prevMessages: Message[]) => [
-          ...prevMessages,
-          newMessage as Message,
-        ]); // Type assertion here
+      } catch (error) {
+        toast.error("Failed to send message");
+        // Optionally remove the user message if sending fails or handle the error as needed
+      } finally {
+        // Clear the message and images state, regardless of whether the send was successful
+        setMessage("");
+        setImages([]);
+        setIsSending(false); // Re-enable send and upload buttons
       }
-    } catch (error) {
-      toast.error("Failed to send message");
-      // Optionally remove the user message if sending fails or handle the error as needed
-    } finally {
-      // Clear the message and images state, regardless of whether the send was successful
-      setMessage("");
-      setImages([]);
-      setIsSending(false); // Re-enable send and upload buttons
     }
   };
 
@@ -1306,14 +1313,7 @@ function ChatContainer() {
           <>
             <Question text="What type of foods have you been craving" />
             {(
-              [
-                "Sweet",
-                "Salty",
-                "Bitter",
-                "Sour",
-                "Pungent",
-                "Other",
-              ] as Food[]
+              ["Sweet", "Salty", "Bitter", "Sour", "Pungent", "Other"] as Food[]
             ).map((option) => (
               <Option key={option} onClick={() => handleSelectFood(option)}>
                 {option}
@@ -1455,6 +1455,7 @@ function ChatContainer() {
                 onChange={handleImageChange}
                 className="hidden"
                 disabled={isSending}
+                ref={fileInputRef}
               />
             </label>
             <textarea
