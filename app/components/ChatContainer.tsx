@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect,useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faPaperclip,
@@ -65,7 +65,7 @@ function ChatContainer() {
   const [userFlow, setUserFlow] = useState<
     Array<{ question: string; answer: string }>
   >([]);
-  const [step, setStep] = useState<number>(1);
+  const [step, setStep] = useState<number>(0);
   const [reason, setReason] = useState<Reason | "">("");
   const [specificSymptom, setSpecificSymptom] = useState<SpecificSymptom | "">(
     ""
@@ -108,7 +108,7 @@ function ChatContainer() {
         ...prevFlow,
         {
           question:
-            "Hi! I'm Flora, your AI guide here to assist you in discovering the perfect herbal formula tailored to your unique health needs. Before we get started, what are your goals in seeking a personalized Traditional Chinese Medicine herbal formula?",
+            "Before we get started, could you tell me a bit about what brought you here today?",
           answer: selectedReason,
         },
       ]);
@@ -572,27 +572,26 @@ function ChatContainer() {
       content: [
         {
           type: "text",
-          text: `Type "Start" below and click the file icon to upload your image`,
+          text: `Hi! I'm Flora, your AI guide here to assist you in discovering the perfect herbal formula tailored to your unique health needs. Type "Start" below and click the file icon to upload your image`,
         },
       ],
     },
   ]);
+  const messagesEndRef = useRef<HTMLDivElement | null>(null);
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
+
   const [isSending, setIsSending] = useState(false);
 
   const fileInputRef = useRef(null);
-  // const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-  //   if (e.target.files) {
-  //     const filesArray = Array.from(e.target.files);
-  //     setImages((prevImages) => {
-  //       // Calculate how many new images we can add
-  //       const availableSlots = 5 - prevImages.length;
-  //       const newImages = filesArray.slice(0, availableSlots);
-  //       return [...prevImages, ...newImages];
-  //     });
-  //   }
-  // };
+
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    console.log(e.target.files);
     if (e.target.files && e.target.files.length > 0) {
       // Take only the first file, ignoring any additional files
       const newImage = e.target.files[0];
@@ -613,27 +612,18 @@ function ChatContainer() {
     setMessage(e.target.value);
   };
 
-  const [hasAssistantMessageBeenAdded, setHasAssistantMessageBeenAdded] =
-    useState(false);
+  const startIndex = Math.max(messages.length - 5, 0);
+  // Slice the messages array to keep only the last 5 messages
+  let trimmedMessagesWithImages = messages.slice(startIndex);
+  const trimmedMessages = trimmedMessagesWithImages.filter((message) => {
+    // Check if every content item is NOT of type 'image_url'
+    return message.content.every(
+      (contentItem) => contentItem.type !== "image_url"
+    );
+  });
+
   const sendMessage = async () => {
     if (images.length > 0 || message !== "") {
-      const userFlowString = userFlow
-        .map((entry) => `${entry.question} Answer: ${entry.answer}`)
-        .join("; ");
-      if (!hasAssistantMessageBeenAdded) {
-        const assistantMessage: Message = {
-          role: "assistant",
-          content: [
-            {
-              type: "text",
-              text: `User health data is below ${userFlowString}`,
-            },
-          ],
-        };
-        setMessages((prevMessages) => [...prevMessages, assistantMessage]);
-        setHasAssistantMessageBeenAdded(true);
-      }
-
       setIsSending(true); // Disable send and upload buttons
 
       // Create the content array for the new user message
@@ -687,13 +677,6 @@ function ChatContainer() {
       };
 
       try {
-        // Calculate start index to keep the last 7 messages before adding new ones
-        const startIndex = Math.max(messages.length - 7, 0);
-        // Slice the messages array to keep only the last 7 messages
-        let trimmedMessages = messages.slice(startIndex);
-
-        console.log(trimmedMessages);
-
         if (images.length === 0) {
           const textContentItem = payload.messages[0].content.find(
             (item) => item.type === "text"
@@ -711,7 +694,7 @@ function ChatContainer() {
                     content: [
                       {
                         type: "text",
-                        text: textMessage, // Ensure textMessage is defined and contains the message you want to send
+                        text: textMessage,
                       },
                     ],
                   },
@@ -726,7 +709,6 @@ function ChatContainer() {
 
             const result = await response.data;
             const finalRes = result.message.content;
-            console.log(finalRes);
             const newMessage: Message = {
               // Explicitly declaring newMessage as type Message
               role: "system",
@@ -748,7 +730,7 @@ function ChatContainer() {
                   {
                     type: "text",
                     text:
-                      "Analyze image and try to find the possible disease." +
+                      "Analyze image and try to find the possible disease only." +
                       message,
                   },
                   ...imageBase64Strings.map((base64) => ({
@@ -772,13 +754,14 @@ function ChatContainer() {
             role: "system",
             content: [{ type: "text", text: textMessage }],
           };
-          console.log(newMessage);
+
           setMessages((prevMessages: Message[]) => [
             ...prevMessages,
             newMessage as Message,
           ]); // Type assertion here
         }
       } catch (error) {
+        console.log(error);
         toast.error("Failed to send message");
         // Optionally remove the user message if sending fails or handle the error as needed
       } finally {
@@ -786,7 +769,10 @@ function ChatContainer() {
         setMessage("");
         setImages([]);
         setIsSending(false); // Re-enable send and upload buttons
+        step === 0 ? setStep(1) : "";
       }
+    } else {
+      toast.error("Please upload image or type something");
     }
   };
 
@@ -815,6 +801,68 @@ function ChatContainer() {
     return `<pre style="white-space: pre-wrap;">${content}</pre>`;
   }
 
+  useEffect(() => {
+    if (step === 9) {
+      const userFlowString = userFlow
+        .map((entry) => `${entry.question} Answer: ${entry.answer}`)
+        .join("; ");
+
+      const assistantMessage: Message = {
+        role: "assistant",
+        content: [
+          {
+            type: "text",
+            text: `User health data is below ${userFlowString}`,
+          },
+        ],
+      };
+      setMessages((prevMessages) => [...prevMessages, assistantMessage]);
+
+      const fetchAPI = async () => {
+        try {
+          const textMessage = userFlowString;
+          const response = await axios.post(
+            "/api/openai",
+            {
+              messages: [
+                ...trimmedMessages,
+                {
+                  role: "user",
+                  content: [
+                    {
+                      type: "text",
+                      text: "Recommend the products: " + textMessage,
+                    },
+                  ],
+                },
+              ],
+            },
+            {
+              headers: {
+                "Content-Type": "application/json",
+              },
+            }
+          );
+
+          const result = await response.data;
+          const finalRes = result.message.content;
+
+          const newMessage: Message = {
+            role: "system",
+            content: [{ type: "text", text: finalRes }],
+          };
+
+          setMessages((prevMessages) => [...prevMessages, newMessage]);
+          setStep(10);
+        } catch (error) {
+          console.error("Failed to send message", error);
+        }
+      };
+      // Execute the async function
+      fetchAPI();
+    }
+  }, [step, userFlow, message, images]);
+
   return (
     <div className="flex flex-col h-full">
       <div className="bg-green max-h-[56px] h-full flex items-center pl-2 pt-1 pb-1">
@@ -829,7 +877,8 @@ function ChatContainer() {
       <div className="max-w-4xl px-2 py-4">
         {step === 1 && (
           <>
-            <Question text="Hi! I'm Flora, your AI guide here to assist you in discovering the perfect herbal formula tailored to your unique health needs. Before we get started, could you tell me a bit about what brought you here today?" />
+            <Question text="Thank you for uploading your image." />
+            <Question text="Before we get started, could you tell me a bit about what brought you here today?" />
             {(
               [
                 "General Health and Wellbeing",
@@ -1368,12 +1417,12 @@ function ChatContainer() {
 
         {step === 9 && (
           <>
-            <Question text="Thank you for completing the questionnaire. We will now assist you with personalized herbal formula recommendations." />
+            <Question text="Thank you for completing the questionnaire. It will take upto 30 seconds to give you product recommendations" />
           </>
         )}
       </div>
 
-      {step === 9 && (
+      {(step === 0 || step === 10) && (
         <>
           <div className="flex-1 overflow-y-auto px-2 py-2">
             {messages.map((message, idx) => {
@@ -1426,6 +1475,7 @@ function ChatContainer() {
                 </div>
               );
             })}
+            <div ref={messagesEndRef} />
           </div>
 
           <div className="p-4">
