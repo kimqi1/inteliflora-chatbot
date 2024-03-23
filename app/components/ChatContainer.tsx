@@ -37,6 +37,7 @@ import {
   Sleep,
   Diet,
   Medications,
+  Food,
 } from "../../types";
 
 // Define the structure of a message
@@ -88,12 +89,14 @@ function ChatContainer() {
   const [sleep, setSleep] = useState<Sleep | "">("");
   const [diet, setDiet] = useState<Diet | "">("");
   const [medications, setMedications] = useState<Medications | "">("");
+  const [food, setFood] = useState<Food | "">("");
 
   const [otherQ1, setOtherQ1] = useState<string>(""); //q1 other
   const [otherQ171, setOtherQ171] = useState<string>(""); //q171 other
   const [otherQ12, setOtherQ12] = useState<string>(""); //q12 other
   const [otherQ41, setOtherQ41] = useState<string>(""); //q41 other
-  const [otherQ61, setOtherQ61] = useState<string>(""); //q81 other
+  const [otherQ61, setOtherQ61] = useState<string>(""); //q61 other
+  const [otherQ711, setOtherQ711] = useState<string>(""); //q711 other
   const [otherQ81, setOtherQ81] = useState<string>(""); //q81 other
 
   const handleSelectReason = (selectedReason: Reason) => {
@@ -427,6 +430,19 @@ function ChatContainer() {
     }
   };
 
+  const handleOtherQ711Submit = () => {
+    setUserFlow((prevFlow) => [
+      ...prevFlow,
+      {
+        question: "Please specify the food have you been craving?",
+        answer: otherQ711.trim(),
+      },
+    ]);
+    if (otherQ711.trim() !== "") {
+      setStep(8);
+    }
+  };
+
   const handleSelectAgeGroup = (selectedAge: AgeGroup) => {
     setUserFlow((prevFlow) => [
       ...prevFlow,
@@ -503,7 +519,19 @@ function ChatContainer() {
       },
     ]);
     setDiet(selectedDiet);
-    setStep(8);
+    selectedDiet === "Cravings for specific foods" ? setStep(7.1) : setStep(8);
+  };
+
+  const handleSelectFood = (selectedFood: Food) => {
+    setUserFlow((prevFlow) => [
+      ...prevFlow,
+      {
+        question: "What type of foods have you been craving?",
+        answer: selectedFood,
+      },
+    ]);
+    setFood(selectedFood);
+    selectedFood === "Other" ? setStep(7.11) : setStep(8);
   };
 
   const handleSelectMedications = (selectedMedications: Medications) => {
@@ -524,7 +552,7 @@ function ChatContainer() {
     setUserFlow((prevFlow) => [
       ...prevFlow,
       {
-        question: "Do you take any medications regularly?",
+        question: "What medications you take?",
         answer: otherQ81.trim(),
       },
     ]);
@@ -1274,7 +1302,7 @@ function ChatContainer() {
           </>
         )}
 
-        {/* {step === 7.1 && (
+        {step === 7.1 && (
           <>
             <Question text="What type of foods have you been craving" />
             {(
@@ -1284,28 +1312,27 @@ function ChatContainer() {
                 "Bitter",
                 "Sour",
                 "Pungent",
-                "Other "
-
-              ] as Diet[]
+                "Other",
+              ] as Food[]
             ).map((option) => (
-              <Option key={option} onClick={() => handleSelectDiet(option)}>
+              <Option key={option} onClick={() => handleSelectFood(option)}>
                 {option}
               </Option>
             ))}
           </>
-        )} */}
+        )}
 
         {step === 7.11 && (
           <>
-            <Question text="Please specify which medications you take" />
+            <Question text="Please specify the food have you been craving?" />
             <input
               type="text"
-              value={otherQ81}
-              onChange={(e) => setOtherQ81(e.target.value)}
+              value={otherQ711}
+              onChange={(e) => setOtherQ711(e.target.value)}
               className="my-2 border border-gray-400 rounded p-2 w-full outline-none focus:outline-none"
               placeholder="Type here..."
             />
-            <Option onClick={handleOtherQ81Submit}>Submit</Option>
+            <Option onClick={handleOtherQ711Submit}>Submit</Option>
           </>
         )}
 

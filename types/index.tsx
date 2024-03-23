@@ -128,6 +128,8 @@ export type Diet =
   | "Changes in appetite but not in eating habits"
   | "No significant changes";
 
+export type Food = "Sweet" | "Salty" | "Bitter" | "Sour" | "Pungent" | "Other";
+
 export type Medications = "Yes" | "Prefer not to say" | "No";
 
 export interface IOptionProps {
