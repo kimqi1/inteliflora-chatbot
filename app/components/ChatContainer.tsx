@@ -67,6 +67,7 @@ function ChatContainer() {
   >([]);
   const [step, setStep] = useState<number>(0);
   const [reason, setReason] = useState<Reason | "">("");
+  const [Q13, setQ13] = useState<string>("");
   const [specificSymptom, setSpecificSymptom] = useState<SpecificSymptom | "">(
     ""
   );
@@ -99,6 +100,17 @@ function ChatContainer() {
   const [otherQ711, setOtherQ711] = useState<string>(""); //q711 other
   const [otherQ81, setOtherQ81] = useState<string>(""); //q81 other
 
+  const [Q133, setQ133] = useState<string>("");
+  const [Q144, setQ144] = useState<string>("");
+  const [Q155, setQ155] = useState<string>("");
+  const [Q166, setQ166] = useState<string>("");
+  const [Q177, setQ177] = useState<string>("");
+  const [Q188, setQ188] = useState<string>("");
+
+  const handleSelectOk = () => {
+    setStep(1);
+  };
+
   const handleSelectReason = (selectedReason: Reason) => {
     setReason(selectedReason);
     if (selectedReason === "Other") {
@@ -113,21 +125,42 @@ function ChatContainer() {
         },
       ]);
 
-      const nextStep =
-        selectedReason === "Address specific health issues" ? 1.1 : 2;
-      setStep(nextStep);
+      switch (selectedReason) {
+        case "Address specific health issues":
+          setStep(1.1);
+          break;
+        case "Support recovery from an illness or injury":
+          setStep(1.3);
+          break;
+        default:
+          setStep(2);
+      }
+    }
+  };
+
+  const handleQ13Submit = () => {
+    setUserFlow((prevFlow) => [
+      ...prevFlow,
+      {
+        question: "Please tell me more about your Illness or Injury",
+        answer: Q13.trim(),
+      },
+    ]);
+    if (Q13.trim() !== "") {
+      setStep(2);
     }
   };
 
   const handleSelectSpecificSymptom = (symptom: SpecificSymptom) => {
     setSpecificSymptom(symptom);
-    setUserFlow((prevFlow) => [
-      ...prevFlow,
-      {
-        question: "Please select your primary health issue",
-        answer: symptom,
-      },
-    ]);
+    if (symptom !== "Other")
+      setUserFlow((prevFlow) => [
+        ...prevFlow,
+        {
+          question: "Please select your primary health issue",
+          answer: symptom,
+        },
+      ]);
     switch (symptom) {
       case "Pain or discomfort":
         setStep(1.11);
@@ -135,8 +168,100 @@ function ChatContainer() {
       case "Other":
         setStep(1.12);
         break;
+      case "Digestive issues":
+        setStep(1.13);
+        break;
+      case "Sleep disturbances":
+        setStep(1.14);
+        break;
+      case "Emotional or mental health concerns":
+        setStep(1.15);
+        break;
+      case "Energy level concerns":
+        setStep(1.16);
+        break;
+      case "Skin conditions":
+        setStep(1.17);
+        break;
+      case "Respiratory issues":
+        setStep(1.18);
+        break;
       default:
         setStep(2);
+    }
+  };
+
+  const handleQ133Submit = () => {
+    setUserFlow((prevFlow) => [
+      ...prevFlow,
+      {
+        question: "Please tell me more about your digestive issues",
+        answer: Q133.trim(),
+      },
+    ]);
+    if (Q133.trim() !== "") {
+      setStep(2);
+    }
+  };
+  const handleQ144Submit = () => {
+    setUserFlow((prevFlow) => [
+      ...prevFlow,
+      {
+        question: "Please tell me more about your Sleep Disturbances",
+        answer: Q144.trim(),
+      },
+    ]);
+    if (Q144.trim() !== "") {
+      setStep(2);
+    }
+  };
+  const handleQ155Submit = () => {
+    setUserFlow((prevFlow) => [
+      ...prevFlow,
+      {
+        question:
+          "Please tell me more about your Emotional or mental health concerns",
+        answer: Q155.trim(),
+      },
+    ]);
+    if (Q155.trim() !== "") {
+      setStep(2);
+    }
+  };
+  const handleQ166Submit = () => {
+    setUserFlow((prevFlow) => [
+      ...prevFlow,
+      {
+        question: "Please tell me more about your Energy Level concerns",
+        answer: Q166.trim(),
+      },
+    ]);
+    if (Q166.trim() !== "") {
+      setStep(2);
+    }
+  };
+  const handleQ177Submit = () => {
+    setUserFlow((prevFlow) => [
+      ...prevFlow,
+      {
+        question: "Please tell me more about your Skin Condition concerns",
+        answer: Q177.trim(),
+      },
+    ]);
+    if (Q177.trim() !== "") {
+      setStep(2);
+    }
+  };
+  const handleQ188Submit = () => {
+    setUserFlow((prevFlow) => [
+      ...prevFlow,
+      {
+        question: "Please tell me more about your Respiratory concerns",
+        answer: Q188.trim(),
+      },
+    ]);
+    if (Q188.trim() !== "") {
+      setStep(2);
     }
   };
 
@@ -395,7 +520,7 @@ function ChatContainer() {
     setUserFlow((prevFlow) => [
       ...prevFlow,
       {
-        question: "Please select your primary health issue:",
+        question: "Please tell your primary health issue:",
         answer: otherQ12.trim(),
       },
     ]);
@@ -572,7 +697,15 @@ function ChatContainer() {
       content: [
         {
           type: "text",
-          text: `Hi! I'm Flora, your AI guide here to assist you in discovering the perfect herbal formula tailored to your unique health needs. Type "Start" below and click the file icon to upload your image`,
+          text: `Hi! I’m Flora, your AI powered herbal guide. 
+Ready to harness the wisdom of Traditional Chinese Medicine to boost your health. 
+          
+Just tap the attachment icon to take or choose a clear well-lit close up photo of your tongue. Then tap the green circle with the white arrow to send. 
+          
+In about 30 seconds, I’ll share some initial insights and ask a few follow up questions to craft the perfect herbal formula for you.
+          
+Eager for personalized health advice? Upload your Tongue Selfie now—It’s simple and fast!"
+          `,
         },
       ],
     },
@@ -769,7 +902,7 @@ function ChatContainer() {
         setMessage("");
         setImages([]);
         setIsSending(false); // Re-enable send and upload buttons
-        step === 0 ? setStep(1) : "";
+        step === 0 ? setStep(0.5) : "";
       }
     } else {
       toast.error("Please upload image or type something");
@@ -875,9 +1008,19 @@ function ChatContainer() {
       </div>
 
       <div className="max-w-4xl px-2 py-4">
+        {step === 0.5 && (
+          <>
+            <Question text="Thank you for taking the first step toward optimal health with InteliFlora. Your Tongue Selfie has unlocked some intriguing insights! To further personalize your herbal blend and ensure it's the perfect fit, I'll need to ask a couple more questions. This way, we'll craft a wellness formula that's as unique as you are. Ready to fine-tune your path to vitality? Press 'Ok' to continue!" />
+            {["Ok"].map((option) => (
+              <Option key={option} onClick={() => handleSelectOk()}>
+                {option}
+              </Option>
+            ))}
+          </>
+        )}
+
         {step === 1 && (
           <>
-            <Question text="Thank you for uploading your image." />
             <Question text="Before we get started, could you tell me a bit about what brought you here today?" />
             {(
               [
@@ -891,6 +1034,20 @@ function ChatContainer() {
                 {reason}
               </Option>
             ))}
+          </>
+        )}
+
+        {step === 1.3 && (
+          <>
+            <Question text="Please tell me more about your Illness or Injury" />
+            <input
+              type="text"
+              value={Q13}
+              onChange={(e) => setQ13(e.target.value)}
+              className="my-2 border border-gray-400 rounded p-2 w-full outline-none focus:outline-none"
+              placeholder="Type here..."
+            />
+            <Option onClick={handleQ13Submit}>Submit</Option>
           </>
         )}
 
@@ -930,6 +1087,90 @@ function ChatContainer() {
               placeholder="Type here..."
             />
             <Option onClick={handleOtherQ12Submit}>Submit</Option>
+          </>
+        )}
+
+        {step === 1.13 && (
+          <>
+            <Question text="Please tell me more about your digestive issues" />
+            <input
+              type="text"
+              value={Q133}
+              onChange={(e) => setQ133(e.target.value)}
+              className="my-2 border border-gray-400 rounded p-2 w-full outline-none focus:outline-none"
+              placeholder="Type here..."
+            />
+            <Option onClick={handleQ133Submit}>Submit</Option>
+          </>
+        )}
+
+        {step === 1.14 && (
+          <>
+            <Question text="Please tell me more about your Sleep Disturbances" />
+            <input
+              type="text"
+              value={Q144}
+              onChange={(e) => setQ144(e.target.value)}
+              className="my-2 border border-gray-400 rounded p-2 w-full outline-none focus:outline-none"
+              placeholder="Type here..."
+            />
+            <Option onClick={handleQ144Submit}>Submit</Option>
+          </>
+        )}
+
+        {step === 1.15 && (
+          <>
+            <Question text="Please tell me more about your Emotional or mental health concerns" />
+            <input
+              type="text"
+              value={Q155}
+              onChange={(e) => setQ155(e.target.value)}
+              className="my-2 border border-gray-400 rounded p-2 w-full outline-none focus:outline-none"
+              placeholder="Type here..."
+            />
+            <Option onClick={handleQ155Submit}>Submit</Option>
+          </>
+        )}
+
+        {step === 1.16 && (
+          <>
+            <Question text="Please tell me more about your Energy Level concerns " />
+            <input
+              type="text"
+              value={Q166}
+              onChange={(e) => setQ166(e.target.value)}
+              className="my-2 border border-gray-400 rounded p-2 w-full outline-none focus:outline-none"
+              placeholder="Type here..."
+            />
+            <Option onClick={handleQ166Submit}>Submit</Option>
+          </>
+        )}
+
+        {step === 1.17 && (
+          <>
+            <Question text="Please tell me more about your Skin Condition concerns" />
+            <input
+              type="text"
+              value={Q177}
+              onChange={(e) => setQ177(e.target.value)}
+              className="my-2 border border-gray-400 rounded p-2 w-full outline-none focus:outline-none"
+              placeholder="Type here..."
+            />
+            <Option onClick={handleQ177Submit}>Submit</Option>
+          </>
+        )}
+
+        {step === 1.18 && (
+          <>
+            <Question text="Please tell me more about your Respiratory concerns" />
+            <input
+              type="text"
+              value={Q188}
+              onChange={(e) => setQ188(e.target.value)}
+              className="my-2 border border-gray-400 rounded p-2 w-full outline-none focus:outline-none"
+              placeholder="Type here..."
+            />
+            <Option onClick={handleQ188Submit}>Submit</Option>
           </>
         )}
 
@@ -1417,7 +1658,28 @@ function ChatContainer() {
 
         {step === 9 && (
           <>
-            <Question text="Thank you for completing the questionnaire. It will take upto 30 seconds to give you product recommendations" />
+            <Question text="Thank you for sharing your details with me! I'm now thoughtfully analyzing the information you've provided to craft a herbal recommendation that’s just right for you. This process is a bit like brewing a soothing tea—it takes a short while, but the result is worth the wait. I’ll be ready with your personalized wellness blend in just a moment." />
+            <div className="text-center mt-12">
+              <div role="status">
+                <svg
+                  aria-hidden="true"
+                  className="inline w-16 h-16 text-gray-200 animate-spin dark:text-gray-600 fill-green"
+                  viewBox="0 0 100 101"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z"
+                    fill="currentColor"
+                  />
+                  <path
+                    d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z"
+                    fill="currentFill"
+                  />
+                </svg>
+                <span className="sr-only">Loading...</span>
+              </div>
+            </div>
           </>
         )}
       </div>
