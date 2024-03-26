@@ -107,6 +107,9 @@ function ChatContainer() {
   const [Q177, setQ177] = useState<string>("");
   const [Q188, setQ188] = useState<string>("");
 
+  const [finalQuestion, setFinalQuestion] = useState<string>("");
+  const [otherFinal, setOtherFinal] = useState<string>("");
+
   const handleSelectOk = () => {
     setStep(1);
   };
@@ -686,6 +689,28 @@ function ChatContainer() {
     }
   };
 
+  const handleFinalQuestion = (option: string) => {
+    setFinalQuestion(option);
+    option == "Yes, there's more to share about my health"
+      ? setStep(9.1)
+      : setStep(10);
+  };
+
+  const handleOtherFinalSubmit = () => {
+    setUserFlow((prevFlow) => [
+      ...prevFlow,
+      {
+        question: `As we approach the final step, it's important we consider all aspects of your well-being.
+        Are there any other health concerns or details you feel would be helpful for me to know?
+        This can ensure that the herbal formula I recommend is perfectly attuned to your needs. Please share anything you think is relevant—no detail is too small.`,
+        answer: otherFinal.trim(),
+      },
+    ]);
+    if (otherFinal.trim() !== "") {
+      setStep(10);
+    }
+  };
+
   //form related questions end
 
   const [images, setImages] = useState<File[]>([]);
@@ -935,7 +960,7 @@ Eager for personalized health advice? Upload your Tongue Selfie now—It’s sim
   }
 
   useEffect(() => {
-    if (step === 9) {
+    if (step === 10) {
       const userFlowString = userFlow
         .map((entry) => `${entry.question} Answer: ${entry.answer}`)
         .join("; ");
@@ -1658,6 +1683,40 @@ Eager for personalized health advice? Upload your Tongue Selfie now—It’s sim
 
         {step === 9 && (
           <>
+            <Question
+              text="As we approach the final step, it's important we consider all aspects of your well-being.
+Are there any other health concerns or details you feel would be helpful for me to know?
+This can ensure that the herbal formula I recommend is perfectly attuned to your needs. Please share anything you think is relevant—no detail is too small."
+            />
+            {["Yes, there's more to share about my health", "No"].map(
+              (option) => (
+                <Option
+                  key={option}
+                  onClick={() => handleFinalQuestion(option)}
+                >
+                  {option}
+                </Option>
+              )
+            )}
+          </>
+        )}
+
+        {step === 9.1 && (
+          <>
+            <Question text="What additional information would be helpful for me to know?" />
+            <input
+              type="text"
+              value={otherFinal}
+              onChange={(e) => setOtherFinal(e.target.value)}
+              className="my-2 border border-gray-400 rounded p-2 w-full outline-none focus:outline-none"
+              placeholder="Type here..."
+            />
+            <Option onClick={handleOtherFinalSubmit}>Submit</Option>
+          </>
+        )}
+
+        {step === 10 && (
+          <>
             <Question text="Thank you for sharing your details with me! I'm now thoughtfully analyzing the information you've provided to craft a herbal recommendation that’s just right for you. This process is a bit like brewing a soothing tea—it takes a short while, but the result is worth the wait. I’ll be ready with your personalized wellness blend in just a moment." />
             <div className="text-center mt-12">
               <div role="status">
@@ -1684,7 +1743,7 @@ Eager for personalized health advice? Upload your Tongue Selfie now—It’s sim
         )}
       </div>
 
-      {(step === 0 || step === 10) && (
+      {(step === 0 || step === 11) && (
         <>
           <div className="flex-1 overflow-y-auto px-2 py-2">
             {messages.map((message, idx) => {
