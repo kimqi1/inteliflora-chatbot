@@ -758,17 +758,39 @@ Eager for personalized health advice? Upload your Tongue Selfie now—It’s sim
       ],
     },
   ]);
+  const [isSending, setIsSending] = useState(false);
+
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
 
+  // const scrollToBottom = () => {
+  //   messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  // };
+
+  // useEffect(() => {
+  //   scrollToBottom();
+  // }, [messages]);
+
+  // const messagesContainerRef = useRef(null); // Add this line
+
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    if (messagesEndRef.current) {
+      const scrollHeight = messagesEndRef.current.scrollHeight;
+      const height = messagesEndRef.current.clientHeight;
+      const maxScrollTop = scrollHeight - height;
+      messagesEndRef.current.scrollTop =
+        maxScrollTop > 0 ? maxScrollTop : 0;
+    }
   };
 
+  // Adjust useEffect to control when scrollToBottom is called...
   useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
+    if (!isSending) {
+      scrollToBottom();
+    }
+  }, [isSending]); // Depend on waitingForResponse
 
-  const [isSending, setIsSending] = useState(false);
+
+
 
   const fileInputRef = useRef(null);
 
