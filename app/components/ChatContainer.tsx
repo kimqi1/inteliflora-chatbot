@@ -1011,7 +1011,7 @@ Eager for personalized health advice? Upload your Tongue Selfie now—It’s sim
           };
 
           setMessages((prevMessages) => [...prevMessages, newMessage]);
-          setStep(10);
+          setStep(11);
         } catch (error) {
           console.error("Failed to send message", error);
         }
