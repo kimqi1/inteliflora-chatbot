@@ -1791,7 +1791,7 @@ This can ensure that the herbal formula I recommend is perfectly attuned to your
 
       {(step === 0 || step === 11) && (
         <>
-          <div className="flex-1 overflow-y-auto px-2 py-2">
+          <div className="flex-1 overflow-y-auto px-2 py-2" ref={messagesEndRef}>
             {messages.map((message, idx) => {
               if (message.role === "assistant") {
                 return null; // Renders nothing for "assistant" role
@@ -1842,7 +1842,7 @@ This can ensure that the herbal formula I recommend is perfectly attuned to your
                 </div>
               );
             })}
-            <div ref={messagesEndRef} />
+            {/* <div ref={messagesEndRef} /> */}
           </div>
 
           <div className="p-4">
