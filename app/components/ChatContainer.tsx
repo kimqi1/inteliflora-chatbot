@@ -20,7 +20,6 @@ import {
   SpecificSymptom,
   SpecificPain,
   AgeGroup,
-  SubAgeGroup,
   Gender,
   HeadacheLocation,
   HeadacheSevere,
@@ -712,6 +711,30 @@ function ChatContainer() {
   };
 
   //form related questions end
+  function formatMessage(content: string) {
+    content = String(content);
+    content = content.replace(/\*\*/g, "");
+    // First, replace Markdown links with <a> tags
+    const markdownLinkRegex = /\[([^\]]+)]\((http[^)]+)\)/g;
+    content = content.replace(markdownLinkRegex, (match, text, url) => {
+      return `<a href="${url.trim()}" target="_blank" style="text-decoration: none; color: #007bff;">${text}</a>`;
+    });
+
+    // Then, replace plain URLs with <a> tags, but only those not already part of an <a> tag
+    const urlRegex =
+      /(\b(https?|ftp|file):\/\/[-A-Z0-9+&@#/%?=~_|!:,.;]*[-A-Z0-9+&@#/%=~_|])/gi;
+    content = content.replace(urlRegex, (url) => {
+      // Avoid replacing URLs in already processed Markdown links
+      const precedingText = content.substring(0, content.indexOf(url));
+      if (!precedingText.endsWith('href="')) {
+        return `<a href="${url.trim()}" target="_blank" style="text-decoration: none; color: #007bff;">${url.trim()}</a>`;
+      } else {
+        return url; // Return the original URL if it's already part of an <a> tag
+      }
+    });
+
+    return `<pre style="white-space: pre-wrap;">${content}</pre>`;
+  }
 
   const [images, setImages] = useState<File[]>([]);
   const [message, setMessage] = useState("");
@@ -770,9 +793,8 @@ Eager for personalized health advice? Upload your Tongue Selfie now—It’s sim
     setMessage(e.target.value);
   };
 
-  const startIndex = Math.max(messages.length - 5, 0);
-  // Slice the messages array to keep only the last 5 messages
-  let trimmedMessagesWithImages = messages.slice(startIndex);
+  const previousMessagesWithoutFirst = messages.slice(1);
+  let trimmedMessagesWithImages = previousMessagesWithoutFirst.slice(-5);
   const trimmedMessages = trimmedMessagesWithImages.filter((message) => {
     // Check if every content item is NOT of type 'image_url'
     return message.content.every(
@@ -834,43 +856,96 @@ Eager for personalized health advice? Upload your Tongue Selfie now—It’s sim
         ],
       };
 
-      try {
-        if (images.length === 0) {
-          const textContentItem = payload.messages[0].content.find(
-            (item) => item.type === "text"
-          );
+      const urls = payload.messages.flatMap((message) =>
+        message.content
+          .filter(
+            (item): item is { type: "image_url"; image_url: { url: any } } =>
+              item.type === "image_url"
+          )
+          .map((item) => item.image_url.url)
+      );
+      setFirstImg(urls);
 
-          if (textContentItem && "text" in textContentItem) {
-            const textMessage = textContentItem.text;
-            const response = await axios.post(
-              "/api/openai",
-              {
-                messages: [
-                  ...trimmedMessages,
-                  {
-                    role: "user",
-                    content: [
-                      {
-                        type: "text",
-                        text: textMessage,
-                      },
-                    ],
-                  },
-                ],
-              },
-              {
-                headers: {
-                  "Content-Type": "application/json",
-                },
-              }
+      try {
+        console.log("executing");
+        if (firstImgCounter) {
+          console.log("hey fool");
+          if (images.length === 0) {
+            const textContentItem = payload.messages[0].content.find(
+              (item) => item.type === "text"
             );
 
-            const result = await response.data;
-            const finalRes = result.message.content;
+            if (textContentItem && "text" in textContentItem) {
+              const textMessage = textContentItem.text;
+              const response = await axios.post(
+                "/api/openai",
+                {
+                  messages: [
+                    ...trimmedMessages,
+                    {
+                      role: "user",
+                      content: [
+                        {
+                          type: "text",
+                          text: textMessage,
+                        },
+                      ],
+                    },
+                  ],
+                },
+                {
+                  headers: {
+                    "Content-Type": "application/json",
+                  },
+                }
+              );
+
+              const result = await response.data;
+              const finalRes = result.message.content;
+              const newMessage: Message = {
+                // Explicitly declaring newMessage as type Message
+                role: "system",
+                content: [{ type: "text", text: finalRes }],
+              };
+
+              setMessages((prevMessages: Message[]) => [
+                ...prevMessages,
+                newMessage as Message,
+              ]); // Type assertion here
+            }
+          } else {
+            const Imgpayload = {
+              messages: [
+                ...trimmedMessages,
+                {
+                  role: "user",
+                  content: [
+                    {
+                      type: "text",
+                      text:
+                        "Analyze image and try to find the possible disease only." +
+                        message,
+                    },
+                    ...imageBase64Strings.map((base64) => ({
+                      type: "image_url",
+                      image_url: { url: base64 },
+                    })),
+                  ],
+                },
+              ],
+            };
+            // Send the message to the backend
+            const response1 = await axios.post("/api/openai", Imgpayload);
+
+            if (!response1.data.success) {
+              toast.error(response1.data.error);
+            }
+
+            const textMessage = response1.data.message.content;
+
             const newMessage: Message = {
-              // Explicitly declaring newMessage as type Message
               role: "system",
-              content: [{ type: "text", text: finalRes }],
+              content: [{ type: "text", text: textMessage }],
             };
 
             setMessages((prevMessages: Message[]) => [
@@ -878,45 +953,6 @@ Eager for personalized health advice? Upload your Tongue Selfie now—It’s sim
               newMessage as Message,
             ]); // Type assertion here
           }
-        } else {
-          const Imgpayload = {
-            messages: [
-              ...trimmedMessages,
-              {
-                role: "user",
-                content: [
-                  {
-                    type: "text",
-                    text:
-                      "Analyze image and try to find the possible disease only." +
-                      message,
-                  },
-                  ...imageBase64Strings.map((base64) => ({
-                    type: "image_url",
-                    image_url: { url: base64 },
-                  })),
-                ],
-              },
-            ],
-          };
-          // Send the message to the backend
-          const response1 = await axios.post("/api/openai", Imgpayload);
-
-          if (!response1.data.success) {
-            toast.error(response1.data.error);
-          }
-
-          const textMessage = response1.data.message.content;
-
-          const newMessage: Message = {
-            role: "system",
-            content: [{ type: "text", text: textMessage }],
-          };
-
-          setMessages((prevMessages: Message[]) => [
-            ...prevMessages,
-            newMessage as Message,
-          ]); // Type assertion here
         }
       } catch (error) {
         console.log(error);
@@ -934,31 +970,8 @@ Eager for personalized health advice? Upload your Tongue Selfie now—It’s sim
     }
   };
 
-  function formatMessage(content: string) {
-    content = String(content);
-    content = content.replace(/\*\*/g, "");
-    // First, replace Markdown links with <a> tags
-    const markdownLinkRegex = /\[([^\]]+)]\((http[^)]+)\)/g;
-    content = content.replace(markdownLinkRegex, (match, text, url) => {
-      return `<a href="${url.trim()}" target="_blank" style="text-decoration: none; color: #007bff;">${text}</a>`;
-    });
-
-    // Then, replace plain URLs with <a> tags, but only those not already part of an <a> tag
-    const urlRegex =
-      /(\b(https?|ftp|file):\/\/[-A-Z0-9+&@#/%?=~_|!:,.;]*[-A-Z0-9+&@#/%=~_|])/gi;
-    content = content.replace(urlRegex, (url) => {
-      // Avoid replacing URLs in already processed Markdown links
-      const precedingText = content.substring(0, content.indexOf(url));
-      if (!precedingText.endsWith('href="')) {
-        return `<a href="${url.trim()}" target="_blank" style="text-decoration: none; color: #007bff;">${url.trim()}</a>`;
-      } else {
-        return url; // Return the original URL if it's already part of an <a> tag
-      }
-    });
-
-    return `<pre style="white-space: pre-wrap;">${content}</pre>`;
-  }
-
+  const [firstImg, setFirstImg] = React.useState<string[]>([]);
+  const [firstImgCounter, setFirstImgCounter] = useState(0);
   useEffect(() => {
     if (step === 10) {
       const userFlowString = userFlow
@@ -989,7 +1002,13 @@ Eager for personalized health advice? Upload your Tongue Selfie now—It’s sim
                   content: [
                     {
                       type: "text",
-                      text: "Recommend the products: " + textMessage,
+                      text:
+                        "Analyze image and tell any possible disease along with recommended products to use. User health data is below: " +
+                        textMessage,
+                    },
+                    {
+                      type: "image_url",
+                      image_url: { url: firstImg[0] },
                     },
                   ],
                 },
@@ -1012,6 +1031,7 @@ Eager for personalized health advice? Upload your Tongue Selfie now—It’s sim
 
           setMessages((prevMessages) => [...prevMessages, newMessage]);
           setStep(11);
+          setFirstImgCounter(1);
         } catch (error) {
           console.error("Failed to send message", error);
         }
