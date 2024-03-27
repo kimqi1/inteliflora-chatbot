@@ -426,7 +426,7 @@ function ChatContainer() {
       },
     ]);
     setAl(al);
-    setStep(1.141);
+    setStep(1.142);
   };
 
   const handleSelectAs = (as: AbdominalSevere) => {
