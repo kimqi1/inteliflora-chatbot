@@ -17,6 +17,17 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
+      <head>
+        {/* Other head elements */}
+        <script dangerouslySetInnerHTML={{ 
+          __html: `
+            if (window.top === window.self) {
+              // The page is not in an iframe
+              document.body.innerHTML = 'This content is only accessible through an iframe.';
+            }
+          `
+        }}></script>
+      </head>
       <body className={inter.className}>
         {children}
         <Toaster />
