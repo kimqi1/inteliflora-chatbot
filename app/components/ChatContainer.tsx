@@ -777,8 +777,7 @@ Eager for personalized health advice? Upload your Tongue Selfie now—It’s sim
       const scrollHeight = messagesEndRef.current.scrollHeight;
       const height = messagesEndRef.current.clientHeight;
       const maxScrollTop = scrollHeight - height;
-      messagesEndRef.current.scrollTop =
-        maxScrollTop > 0 ? maxScrollTop : 0;
+      messagesEndRef.current.scrollTop = maxScrollTop > 0 ? maxScrollTop : 0;
     }
   };
 
@@ -788,9 +787,6 @@ Eager for personalized health advice? Upload your Tongue Selfie now—It’s sim
       scrollToBottom();
     }
   }, [isSending]); // Depend on waitingForResponse
-
-
-
 
   const fileInputRef = useRef(null);
 
@@ -1078,720 +1074,743 @@ Eager for personalized health advice? Upload your Tongue Selfie now—It’s sim
         <h2 className="text-white text-lg">Ask Inteliflora</h2>
       </div>
 
-      <div className="max-w-4xl px-2 py-4">
-        {step === 0.5 && (
-          <>
-            <Question text="Thank you for taking the first step toward optimal health with InteliFlora. Your Tongue Selfie has unlocked some intriguing insights! To further personalize your herbal blend and ensure it's the perfect fit, I'll need to ask a couple more questions. This way, we'll craft a wellness formula that's as unique as you are. Ready to fine-tune your path to vitality? Press 'Ok' to continue!" />
-            {["Ok"].map((option) => (
-              <Option key={option} onClick={() => handleSelectOk()}>
-                {option}
-              </Option>
-            ))}
-          </>
-        )}
+      {!(step === 0 || step === 11) && (
+        <div className="max-w-4xl px-2 py-4">
+          {step === 0.5 && (
+            <>
+              <Question text="Thank you for taking the first step toward optimal health with InteliFlora. Your Tongue Selfie has unlocked some intriguing insights! To further personalize your herbal blend and ensure it's the perfect fit, I'll need to ask a couple more questions. This way, we'll craft a wellness formula that's as unique as you are. Ready to fine-tune your path to vitality? Press 'Ok' to continue!" />
+              {["Ok"].map((option) => (
+                <Option key={option} onClick={() => handleSelectOk()}>
+                  {option}
+                </Option>
+              ))}
+            </>
+          )}
 
-        {step === 1 && (
-          <>
-            <Question text="Before we get started, could you tell me a bit about what brought you here today?" />
-            {(
-              [
-                "General Health and Wellbeing",
-                "Address specific health issues",
-                "Support recovery from an illness or injury",
-                "Other",
-              ] as Reason[]
-            ).map((reason) => (
-              <Option key={reason} onClick={() => handleSelectReason(reason)}>
-                {reason}
-              </Option>
-            ))}
-          </>
-        )}
+          {step === 1 && (
+            <>
+              <Question text="Before we get started, could you tell me a bit about what brought you here today?" />
+              {(
+                [
+                  "General Health and Wellbeing",
+                  "Address specific health issues",
+                  "Support recovery from an illness or injury",
+                  "Other",
+                ] as Reason[]
+              ).map((reason) => (
+                <Option key={reason} onClick={() => handleSelectReason(reason)}>
+                  {reason}
+                </Option>
+              ))}
+            </>
+          )}
 
-        {step === 1.3 && (
-          <>
-            <Question text="Please tell me more about your Illness or Injury" />
-            <input
-              type="text"
-              value={Q13}
-              onChange={(e) => setQ13(e.target.value)}
-              className="my-2 border border-gray-400 rounded p-2 w-full outline-none focus:outline-none"
-              placeholder="Type here..."
-            />
-            <Option onClick={handleQ13Submit}>Submit</Option>
-          </>
-        )}
+          {step === 1.3 && (
+            <>
+              <Question text="Please tell me more about your Illness or Injury" />
+              <input
+                type="text"
+                value={Q13}
+                onChange={(e) => setQ13(e.target.value)}
+                className="my-2 border border-gray-400 rounded p-2 w-full outline-none focus:outline-none"
+                placeholder="Type here..."
+              />
+              <Option onClick={handleQ13Submit}>Submit</Option>
+            </>
+          )}
 
-        {step === 1.1 && (
-          <>
-            <Question text="Please select your primary health issue." />
-            {(
-              [
-                "Pain or discomfort",
-                "Digestive issues",
-                "Sleep disturbances",
-                "Emotional or mental health concerns",
-                "Energy level concerns",
-                "Skin conditions",
-                "Respiratory issues",
-                "Other",
-              ] as SpecificSymptom[]
-            ).map((symptom) => (
-              <Option
-                key={symptom}
-                onClick={() => handleSelectSpecificSymptom(symptom)}
-              >
-                {symptom}
-              </Option>
-            ))}
-          </>
-        )}
+          {step === 1.1 && (
+            <>
+              <Question text="Please select your primary health issue." />
+              {(
+                [
+                  "Pain or discomfort",
+                  "Digestive issues",
+                  "Sleep disturbances",
+                  "Emotional or mental health concerns",
+                  "Energy level concerns",
+                  "Skin conditions",
+                  "Respiratory issues",
+                  "Other",
+                ] as SpecificSymptom[]
+              ).map((symptom) => (
+                <Option
+                  key={symptom}
+                  onClick={() => handleSelectSpecificSymptom(symptom)}
+                >
+                  {symptom}
+                </Option>
+              ))}
+            </>
+          )}
 
-        {step === 1.12 && (
-          <>
-            <Question text="Please describe your health issue." />
-            <input
-              type="text"
-              value={otherQ12}
-              onChange={(e) => setOtherQ12(e.target.value)}
-              className="my-2 border border-gray-400 rounded p-2 w-full outline-none focus:outline-none"
-              placeholder="Type here..."
-            />
-            <Option onClick={handleOtherQ12Submit}>Submit</Option>
-          </>
-        )}
+          {step === 1.12 && (
+            <>
+              <Question text="Please describe your health issue." />
+              <input
+                type="text"
+                value={otherQ12}
+                onChange={(e) => setOtherQ12(e.target.value)}
+                className="my-2 border border-gray-400 rounded p-2 w-full outline-none focus:outline-none"
+                placeholder="Type here..."
+              />
+              <Option onClick={handleOtherQ12Submit}>Submit</Option>
+            </>
+          )}
 
-        {step === 1.13 && (
-          <>
-            <Question text="Please tell me more about your digestive issues" />
-            <input
-              type="text"
-              value={Q133}
-              onChange={(e) => setQ133(e.target.value)}
-              className="my-2 border border-gray-400 rounded p-2 w-full outline-none focus:outline-none"
-              placeholder="Type here..."
-            />
-            <Option onClick={handleQ133Submit}>Submit</Option>
-          </>
-        )}
+          {step === 1.13 && (
+            <>
+              <Question text="Please tell me more about your digestive issues" />
+              <input
+                type="text"
+                value={Q133}
+                onChange={(e) => setQ133(e.target.value)}
+                className="my-2 border border-gray-400 rounded p-2 w-full outline-none focus:outline-none"
+                placeholder="Type here..."
+              />
+              <Option onClick={handleQ133Submit}>Submit</Option>
+            </>
+          )}
 
-        {step === 1.14 && (
-          <>
-            <Question text="Please tell me more about your Sleep Disturbances" />
-            <input
-              type="text"
-              value={Q144}
-              onChange={(e) => setQ144(e.target.value)}
-              className="my-2 border border-gray-400 rounded p-2 w-full outline-none focus:outline-none"
-              placeholder="Type here..."
-            />
-            <Option onClick={handleQ144Submit}>Submit</Option>
-          </>
-        )}
+          {step === 1.14 && (
+            <>
+              <Question text="Please tell me more about your Sleep Disturbances" />
+              <input
+                type="text"
+                value={Q144}
+                onChange={(e) => setQ144(e.target.value)}
+                className="my-2 border border-gray-400 rounded p-2 w-full outline-none focus:outline-none"
+                placeholder="Type here..."
+              />
+              <Option onClick={handleQ144Submit}>Submit</Option>
+            </>
+          )}
 
-        {step === 1.15 && (
-          <>
-            <Question text="Please tell me more about your Emotional or mental health concerns" />
-            <input
-              type="text"
-              value={Q155}
-              onChange={(e) => setQ155(e.target.value)}
-              className="my-2 border border-gray-400 rounded p-2 w-full outline-none focus:outline-none"
-              placeholder="Type here..."
-            />
-            <Option onClick={handleQ155Submit}>Submit</Option>
-          </>
-        )}
+          {step === 1.15 && (
+            <>
+              <Question text="Please tell me more about your Emotional or mental health concerns" />
+              <input
+                type="text"
+                value={Q155}
+                onChange={(e) => setQ155(e.target.value)}
+                className="my-2 border border-gray-400 rounded p-2 w-full outline-none focus:outline-none"
+                placeholder="Type here..."
+              />
+              <Option onClick={handleQ155Submit}>Submit</Option>
+            </>
+          )}
 
-        {step === 1.16 && (
-          <>
-            <Question text="Please tell me more about your Energy Level concerns " />
-            <input
-              type="text"
-              value={Q166}
-              onChange={(e) => setQ166(e.target.value)}
-              className="my-2 border border-gray-400 rounded p-2 w-full outline-none focus:outline-none"
-              placeholder="Type here..."
-            />
-            <Option onClick={handleQ166Submit}>Submit</Option>
-          </>
-        )}
+          {step === 1.16 && (
+            <>
+              <Question text="Please tell me more about your Energy Level concerns " />
+              <input
+                type="text"
+                value={Q166}
+                onChange={(e) => setQ166(e.target.value)}
+                className="my-2 border border-gray-400 rounded p-2 w-full outline-none focus:outline-none"
+                placeholder="Type here..."
+              />
+              <Option onClick={handleQ166Submit}>Submit</Option>
+            </>
+          )}
 
-        {step === 1.17 && (
-          <>
-            <Question text="Please tell me more about your Skin Condition concerns" />
-            <input
-              type="text"
-              value={Q177}
-              onChange={(e) => setQ177(e.target.value)}
-              className="my-2 border border-gray-400 rounded p-2 w-full outline-none focus:outline-none"
-              placeholder="Type here..."
-            />
-            <Option onClick={handleQ177Submit}>Submit</Option>
-          </>
-        )}
+          {step === 1.17 && (
+            <>
+              <Question text="Please tell me more about your Skin Condition concerns" />
+              <input
+                type="text"
+                value={Q177}
+                onChange={(e) => setQ177(e.target.value)}
+                className="my-2 border border-gray-400 rounded p-2 w-full outline-none focus:outline-none"
+                placeholder="Type here..."
+              />
+              <Option onClick={handleQ177Submit}>Submit</Option>
+            </>
+          )}
 
-        {step === 1.18 && (
-          <>
-            <Question text="Please tell me more about your Respiratory concerns" />
-            <input
-              type="text"
-              value={Q188}
-              onChange={(e) => setQ188(e.target.value)}
-              className="my-2 border border-gray-400 rounded p-2 w-full outline-none focus:outline-none"
-              placeholder="Type here..."
-            />
-            <Option onClick={handleQ188Submit}>Submit</Option>
-          </>
-        )}
+          {step === 1.18 && (
+            <>
+              <Question text="Please tell me more about your Respiratory concerns" />
+              <input
+                type="text"
+                value={Q188}
+                onChange={(e) => setQ188(e.target.value)}
+                className="my-2 border border-gray-400 rounded p-2 w-full outline-none focus:outline-none"
+                placeholder="Type here..."
+              />
+              <Option onClick={handleQ188Submit}>Submit</Option>
+            </>
+          )}
 
-        {step === 1.11 && (
-          <>
-            <Question text="Please select the type that best describes your condition." />
-            {(
-              [
-                "Headache",
-                "Joint pain",
-                "Muscle ache",
-                "Abdominal pain",
-                "Chest discomfort",
-                "Back pain",
-                "None",
-                "Other",
-              ] as SpecificPain[]
-            ).map((pain) => (
-              <Option key={pain} onClick={() => handleSelectSpecificPain(pain)}>
-                {pain}
-              </Option>
-            ))}
-          </>
-        )}
+          {step === 1.11 && (
+            <>
+              <Question text="Please select the type that best describes your condition." />
+              {(
+                [
+                  "Headache",
+                  "Joint pain",
+                  "Muscle ache",
+                  "Abdominal pain",
+                  "Chest discomfort",
+                  "Back pain",
+                  "None",
+                  "Other",
+                ] as SpecificPain[]
+              ).map((pain) => (
+                <Option
+                  key={pain}
+                  onClick={() => handleSelectSpecificPain(pain)}
+                >
+                  {pain}
+                </Option>
+              ))}
+            </>
+          )}
 
-        {step === 1.111 && (
-          <>
-            <Question text="Where is your headache primarily located?" />
-            {(
-              [
-                "Forehead",
-                "Temples",
-                "Top of head",
-                "Back of head/neck area",
-                "All over/General",
-              ] as HeadacheLocation[]
-            ).map((option) => (
-              <Option key={option} onClick={() => handleSelectHl(option)}>
-                {option}
-              </Option>
-            ))}
-          </>
-        )}
+          {step === 1.111 && (
+            <>
+              <Question text="Where is your headache primarily located?" />
+              {(
+                [
+                  "Forehead",
+                  "Temples",
+                  "Top of head",
+                  "Back of head/neck area",
+                  "All over/General",
+                ] as HeadacheLocation[]
+              ).map((option) => (
+                <Option key={option} onClick={() => handleSelectHl(option)}>
+                  {option}
+                </Option>
+              ))}
+            </>
+          )}
 
-        {step === 1.112 && (
-          <>
-            <Question text="How would you describe your headache?" />
-            {(
-              [
-                "Throbbing or pulsating",
-                "Pressing or tightening",
-                "Sharp or stabbing",
-                "Constant dull ache",
-              ] as HeadacheSevere[]
-            ).map((option) => (
-              <Option key={option} onClick={() => handleSelectHs(option)}>
-                {option}
-              </Option>
-            ))}
-          </>
-        )}
+          {step === 1.112 && (
+            <>
+              <Question text="How would you describe your headache?" />
+              {(
+                [
+                  "Throbbing or pulsating",
+                  "Pressing or tightening",
+                  "Sharp or stabbing",
+                  "Constant dull ache",
+                ] as HeadacheSevere[]
+              ).map((option) => (
+                <Option key={option} onClick={() => handleSelectHs(option)}>
+                  {option}
+                </Option>
+              ))}
+            </>
+          )}
 
-        {step === 1.121 && (
-          <>
-            <Question text="Which joints are affected? (Select all that apply)" />
-            {[
-              "Hands or wrists",
-              "Knees",
-              "Elbows",
-              "Shoulders",
-              "Hips",
-              "Ankles or feet",
-            ].map((option) => (
-              <Option
-                key={option}
-                onClick={() => handleSelectSpecificJoint(option)}
-                isSelected={selectedJointOptions.includes(option)}
-              >
-                {option}
-              </Option>
-            ))}
-            <br></br>
-            <button
-              className="mt-4 text-sm border py-2 px-6 rounded bg-green text-white "
-              onClick={handleJointNext}
-            >
-              Next
-            </button>
-          </>
-        )}
-
-        {step === 1.122 && (
-          <>
-            <Question text="How would you describe the pain in your joints?" />
-            {(
-              [
-                "Sharp or severe",
-                "Dull or aching",
-                "Stiffness or limited movement",
-                "Swelling or warmth",
-              ] as JointSevere[]
-            ).map((option) => (
-              <Option key={option} onClick={() => handleSelectJs(option)}>
-                {option}
-              </Option>
-            ))}
-          </>
-        )}
-
-        {step === 1.131 && (
-          <>
-            <Question text="Where is the muscle ache located? (Select all that apply)" />
-            {[
-              "Upper back and shoulders",
-              "Lower back",
-              "Arms",
-              "Legs",
-              "General body ache",
-            ].map((option) => (
-              <Option
-                key={option}
-                onClick={() => handleSelectSpecificMuscle(option)}
-                isSelected={selectedMuscleOptions.includes(option)}
-              >
-                {option}
-              </Option>
-            ))}
-            <br></br>
-            <button
-              className="mt-4 text-sm border py-2 px-6 rounded bg-green text-white "
-              onClick={handleMuscleNext}
-            >
-              Next
-            </button>
-          </>
-        )}
-
-        {step === 1.132 && (
-          <>
-            <Question text="What triggers your muscle ache?" />
-            {(
-              [
-                "Physical activity or exercise",
-                "Stress or tension",
-                "Prolonged sitting or standing",
-                "Unidentified; it occurs randomly",
-              ] as MuscleTrigger[]
-            ).map((option) => (
-              <Option key={option} onClick={() => handleSelectMt(option)}>
-                {option}
-              </Option>
-            ))}
-          </>
-        )}
-
-        {step === 1.141 && (
-          <>
-            <Question text="Can you pinpoint where the abdominal pain is most intense?" />
-            {(
-              [
-                "Upper abdomen",
-                "Lower abdomen",
-                "Right side",
-                "Left side",
-                "Diffuse, all over the abdomen",
-              ] as AbdominalLocation[]
-            ).map((option) => (
-              <Option key={option} onClick={() => handleSelectAl(option)}>
-                {option}
-              </Option>
-            ))}
-          </>
-        )}
-
-        {step === 1.142 && (
-          <>
-            <Question text="What type of sensation do you experience with your abdominal pain?" />
-            {(
-              [
-                "Sharp or stabbing",
-                "Cramping or spasmodic",
-                "Dull or aching",
-                "Bloating or gassy feeling",
-              ] as AbdominalSevere[]
-            ).map((option) => (
-              <Option key={option} onClick={() => handleSelectAs(option)}>
-                {option}
-              </Option>
-            ))}
-          </>
-        )}
-
-        {step === 1.151 && (
-          <>
-            <Question text="Can you describe the nature of your chest discomfort?" />
-            {(
-              [
-                "Sharp or piercing pain",
-                "Tightness or pressure",
-                "Burning sensation",
-                "Heavy feeling or squeezing",
-              ] as ChestSevere[]
-            ).map((option) => (
-              <Option key={option} onClick={() => handleSelectCs(option)}>
-                {option}
-              </Option>
-            ))}
-          </>
-        )}
-
-        {step === 1.152 && (
-          <>
-            <Question text="Does anything specific trigger your chest discomfort?" />
-            {(
-              [
-                "Physical exertion",
-                "Emotional stress",
-                "Eating or digestion",
-                "Breathing deeply",
-              ] as ChestTrigger[]
-            ).map((option) => (
-              <Option key={option} onClick={() => handleSelectCt(option)}>
-                {option}
-              </Option>
-            ))}
-          </>
-        )}
-
-        {step === 1.161 && (
-          <>
-            <Question text="Where is your back pain located?" />
-            {(
-              [
-                "Upper back",
-                "Middle back",
-                "Lower back",
-                "Spreads to the buttocks or legs",
-              ] as BackLocation[]
-            ).map((option) => (
-              <Option key={option} onClick={() => handleSelectBl(option)}>
-                {option}
-              </Option>
-            ))}
-          </>
-        )}
-
-        {step === 1.162 && (
-          <>
-            <Question text="How would you describe your back pain?" />
-            {(
-              [
-                "Sharp or stabbing",
-                "Dull or aching",
-                "Burning sensation",
-                "Stiffness or immobility",
-              ] as BackSevere[]
-            ).map((option) => (
-              <Option key={option} onClick={() => handleSelectBs(option)}>
-                {option}
-              </Option>
-            ))}
-          </>
-        )}
-
-        {step === 1.171 && (
-          <>
-            <Question text="Please specify the location and describe the type of pain or discomfort you are experiencing" />
-            <input
-              type="text"
-              value={otherQ171}
-              onChange={(e) => setOtherQ171(e.target.value)}
-              className="my-2 border border-gray-400 rounded p-2 w-full outline-none focus:outline-none"
-              placeholder="Type here..."
-            />
-            <Option onClick={handleOtherQ171Submit}>Submit</Option>
-          </>
-        )}
-
-        {step === 1.2 && (
-          <>
-            <Question text="Please describe your reason." />
-            <input
-              type="text"
-              value={otherQ1}
-              onChange={(e) => setOtherQ1(e.target.value)}
-              className="my-2 border border-gray-400 rounded p-2 w-full outline-none focus:outline-none"
-              placeholder="Type here..."
-            />
-            <Option onClick={handleOtherQ1Submit}>Submit</Option>
-          </>
-        )}
-
-        {step === 2 && (
-          <>
-            <Question text="Please select the age range that best represents you." />
-            {(
-              [
-                "Under 18",
-                "18-30",
-                "31-40",
-                "41-50",
-                "51-60",
-                "61 and older",
-              ] as AgeGroup[]
-            ).map((option) => (
-              <Option key={option} onClick={() => handleSelectAgeGroup(option)}>
-                {option}
-              </Option>
-            ))}
-          </>
-        )}
-
-        {step === 3 && (
-          <>
-            <Question text="What is your gender identity?" />
-            {(
-              ["Male", "Female", "Non-binary", "Prefer not to say"] as Gender[]
-            ).map((option) => (
-              <Option key={option} onClick={() => handleSelectGender(option)}>
-                {option}
-              </Option>
-            ))}
-          </>
-        )}
-
-        {step === 4 && (
-          <>
-            <Question text="How would you describe your current mental and emotional state?" />
-            {(
-              [
-                "Generally stable and positive",
-                "Frequently anxious or nervous",
-                "Often feel down or depressed",
-                "Experience mood swings",
-                "Feel stressed or overwhelmed",
-                "Other",
-              ] as MentalState[]
-            ).map((option) => (
-              <Option key={option} onClick={() => handleSelectMental(option)}>
-                {option}
-              </Option>
-            ))}
-          </>
-        )}
-
-        {step === 4.1 && (
-          <>
-            <Question text="Please specify your mental state" />
-            <input
-              type="text"
-              value={otherQ41}
-              onChange={(e) => setOtherQ41(e.target.value)}
-              className="my-2 border border-gray-400 rounded p-2 w-full outline-none focus:outline-none"
-              placeholder="Type here..."
-            />
-            <Option onClick={handleOtherQ41Submit}>Submit</Option>
-          </>
-        )}
-
-        {step === 5 && (
-          <>
-            <Question text="Have you noticed any changes in your energy levels lately?" />
-            {(
-              [
-                "Yes, I feel more energetic",
-                "Yes, I feel less energetic",
-                "No significant change",
-              ] as Energy[]
-            ).map((option) => (
-              <Option key={option} onClick={() => handleSelectEnergy(option)}>
-                {option}
-              </Option>
-            ))}
-          </>
-        )}
-
-        {step === 6 && (
-          <>
-            <Question text="How has your sleep been?" />
-            {(
-              [
-                "Regular and restful",
-                "Difficulty falling asleep",
-                "Waking up frequently during the night",
-                "Feeling tired after waking up",
-                "Other",
-              ] as Sleep[]
-            ).map((option) => (
-              <Option key={option} onClick={() => handleSelectSleep(option)}>
-                {option}
-              </Option>
-            ))}
-          </>
-        )}
-
-        {step === 6.1 && (
-          <>
-            <Question text="Please specify your sleep state" />
-            <input
-              type="text"
-              value={otherQ61}
-              onChange={(e) => setOtherQ61(e.target.value)}
-              className="my-2 border border-gray-400 rounded p-2 w-full outline-none focus:outline-none"
-              placeholder="Type here..."
-            />
-            <Option onClick={handleOtherQ61Submit}>Submit</Option>
-          </>
-        )}
-
-        {step === 7 && (
-          <>
-            <Question text="Have there been any significant changes in your diet or appetite?" />
-            {(
-              [
-                "Eating more than usual",
-                "Eating less than usual",
-                "Cravings for specific foods",
-                "Changes in appetite but not in eating habits",
-                "No significant changes",
-              ] as Diet[]
-            ).map((option) => (
-              <Option key={option} onClick={() => handleSelectDiet(option)}>
-                {option}
-              </Option>
-            ))}
-          </>
-        )}
-
-        {step === 7.1 && (
-          <>
-            <Question text="What type of foods have you been craving" />
-            {(
-              ["Sweet", "Salty", "Bitter", "Sour", "Pungent", "Other"] as Food[]
-            ).map((option) => (
-              <Option key={option} onClick={() => handleSelectFood(option)}>
-                {option}
-              </Option>
-            ))}
-          </>
-        )}
-
-        {step === 7.11 && (
-          <>
-            <Question text="Please specify the food have you been craving?" />
-            <input
-              type="text"
-              value={otherQ711}
-              onChange={(e) => setOtherQ711(e.target.value)}
-              className="my-2 border border-gray-400 rounded p-2 w-full outline-none focus:outline-none"
-              placeholder="Type here..."
-            />
-            <Option onClick={handleOtherQ711Submit}>Submit</Option>
-          </>
-        )}
-
-        {step === 8 && (
-          <>
-            <Question text="Do you take any medications regularly?" />
-            {(["Yes", "No", "Prefer not to say"] as Medications[]).map(
-              (option) => (
+          {step === 1.121 && (
+            <>
+              <Question text="Which joints are affected? (Select all that apply)" />
+              {[
+                "Hands or wrists",
+                "Knees",
+                "Elbows",
+                "Shoulders",
+                "Hips",
+                "Ankles or feet",
+              ].map((option) => (
                 <Option
                   key={option}
-                  onClick={() => handleSelectMedications(option)}
+                  onClick={() => handleSelectSpecificJoint(option)}
+                  isSelected={selectedJointOptions.includes(option)}
                 >
                   {option}
                 </Option>
-              )
-            )}
-          </>
-        )}
+              ))}
+              <br></br>
+              <button
+                className="mt-4 text-sm border py-2 px-6 rounded bg-green text-white "
+                onClick={handleJointNext}
+              >
+                Next
+              </button>
+            </>
+          )}
 
-        {step === 8.1 && (
-          <>
-            <Question text="Please specify which medications you take" />
-            <input
-              type="text"
-              value={otherQ81}
-              onChange={(e) => setOtherQ81(e.target.value)}
-              className="my-2 border border-gray-400 rounded p-2 w-full outline-none focus:outline-none"
-              placeholder="Type here..."
-            />
-            <Option onClick={handleOtherQ81Submit}>Submit</Option>
-          </>
-        )}
+          {step === 1.122 && (
+            <>
+              <Question text="How would you describe the pain in your joints?" />
+              {(
+                [
+                  "Sharp or severe",
+                  "Dull or aching",
+                  "Stiffness or limited movement",
+                  "Swelling or warmth",
+                ] as JointSevere[]
+              ).map((option) => (
+                <Option key={option} onClick={() => handleSelectJs(option)}>
+                  {option}
+                </Option>
+              ))}
+            </>
+          )}
 
-        {step === 9 && (
-          <>
-            <Question
-              text="As we approach the final step, it's important we consider all aspects of your well-being.
+          {step === 1.131 && (
+            <>
+              <Question text="Where is the muscle ache located? (Select all that apply)" />
+              {[
+                "Upper back and shoulders",
+                "Lower back",
+                "Arms",
+                "Legs",
+                "General body ache",
+              ].map((option) => (
+                <Option
+                  key={option}
+                  onClick={() => handleSelectSpecificMuscle(option)}
+                  isSelected={selectedMuscleOptions.includes(option)}
+                >
+                  {option}
+                </Option>
+              ))}
+              <br></br>
+              <button
+                className="mt-4 text-sm border py-2 px-6 rounded bg-green text-white "
+                onClick={handleMuscleNext}
+              >
+                Next
+              </button>
+            </>
+          )}
+
+          {step === 1.132 && (
+            <>
+              <Question text="What triggers your muscle ache?" />
+              {(
+                [
+                  "Physical activity or exercise",
+                  "Stress or tension",
+                  "Prolonged sitting or standing",
+                  "Unidentified; it occurs randomly",
+                ] as MuscleTrigger[]
+              ).map((option) => (
+                <Option key={option} onClick={() => handleSelectMt(option)}>
+                  {option}
+                </Option>
+              ))}
+            </>
+          )}
+
+          {step === 1.141 && (
+            <>
+              <Question text="Can you pinpoint where the abdominal pain is most intense?" />
+              {(
+                [
+                  "Upper abdomen",
+                  "Lower abdomen",
+                  "Right side",
+                  "Left side",
+                  "Diffuse, all over the abdomen",
+                ] as AbdominalLocation[]
+              ).map((option) => (
+                <Option key={option} onClick={() => handleSelectAl(option)}>
+                  {option}
+                </Option>
+              ))}
+            </>
+          )}
+
+          {step === 1.142 && (
+            <>
+              <Question text="What type of sensation do you experience with your abdominal pain?" />
+              {(
+                [
+                  "Sharp or stabbing",
+                  "Cramping or spasmodic",
+                  "Dull or aching",
+                  "Bloating or gassy feeling",
+                ] as AbdominalSevere[]
+              ).map((option) => (
+                <Option key={option} onClick={() => handleSelectAs(option)}>
+                  {option}
+                </Option>
+              ))}
+            </>
+          )}
+
+          {step === 1.151 && (
+            <>
+              <Question text="Can you describe the nature of your chest discomfort?" />
+              {(
+                [
+                  "Sharp or piercing pain",
+                  "Tightness or pressure",
+                  "Burning sensation",
+                  "Heavy feeling or squeezing",
+                ] as ChestSevere[]
+              ).map((option) => (
+                <Option key={option} onClick={() => handleSelectCs(option)}>
+                  {option}
+                </Option>
+              ))}
+            </>
+          )}
+
+          {step === 1.152 && (
+            <>
+              <Question text="Does anything specific trigger your chest discomfort?" />
+              {(
+                [
+                  "Physical exertion",
+                  "Emotional stress",
+                  "Eating or digestion",
+                  "Breathing deeply",
+                ] as ChestTrigger[]
+              ).map((option) => (
+                <Option key={option} onClick={() => handleSelectCt(option)}>
+                  {option}
+                </Option>
+              ))}
+            </>
+          )}
+
+          {step === 1.161 && (
+            <>
+              <Question text="Where is your back pain located?" />
+              {(
+                [
+                  "Upper back",
+                  "Middle back",
+                  "Lower back",
+                  "Spreads to the buttocks or legs",
+                ] as BackLocation[]
+              ).map((option) => (
+                <Option key={option} onClick={() => handleSelectBl(option)}>
+                  {option}
+                </Option>
+              ))}
+            </>
+          )}
+
+          {step === 1.162 && (
+            <>
+              <Question text="How would you describe your back pain?" />
+              {(
+                [
+                  "Sharp or stabbing",
+                  "Dull or aching",
+                  "Burning sensation",
+                  "Stiffness or immobility",
+                ] as BackSevere[]
+              ).map((option) => (
+                <Option key={option} onClick={() => handleSelectBs(option)}>
+                  {option}
+                </Option>
+              ))}
+            </>
+          )}
+
+          {step === 1.171 && (
+            <>
+              <Question text="Please specify the location and describe the type of pain or discomfort you are experiencing" />
+              <input
+                type="text"
+                value={otherQ171}
+                onChange={(e) => setOtherQ171(e.target.value)}
+                className="my-2 border border-gray-400 rounded p-2 w-full outline-none focus:outline-none"
+                placeholder="Type here..."
+              />
+              <Option onClick={handleOtherQ171Submit}>Submit</Option>
+            </>
+          )}
+
+          {step === 1.2 && (
+            <>
+              <Question text="Please describe your reason." />
+              <input
+                type="text"
+                value={otherQ1}
+                onChange={(e) => setOtherQ1(e.target.value)}
+                className="my-2 border border-gray-400 rounded p-2 w-full outline-none focus:outline-none"
+                placeholder="Type here..."
+              />
+              <Option onClick={handleOtherQ1Submit}>Submit</Option>
+            </>
+          )}
+
+          {step === 2 && (
+            <>
+              <Question text="Please select the age range that best represents you." />
+              {(
+                [
+                  "Under 18",
+                  "18-30",
+                  "31-40",
+                  "41-50",
+                  "51-60",
+                  "61 and older",
+                ] as AgeGroup[]
+              ).map((option) => (
+                <Option
+                  key={option}
+                  onClick={() => handleSelectAgeGroup(option)}
+                >
+                  {option}
+                </Option>
+              ))}
+            </>
+          )}
+
+          {step === 3 && (
+            <>
+              <Question text="What is your gender identity?" />
+              {(
+                [
+                  "Male",
+                  "Female",
+                  "Non-binary",
+                  "Prefer not to say",
+                ] as Gender[]
+              ).map((option) => (
+                <Option key={option} onClick={() => handleSelectGender(option)}>
+                  {option}
+                </Option>
+              ))}
+            </>
+          )}
+
+          {step === 4 && (
+            <>
+              <Question text="How would you describe your current mental and emotional state?" />
+              {(
+                [
+                  "Generally stable and positive",
+                  "Frequently anxious or nervous",
+                  "Often feel down or depressed",
+                  "Experience mood swings",
+                  "Feel stressed or overwhelmed",
+                  "Other",
+                ] as MentalState[]
+              ).map((option) => (
+                <Option key={option} onClick={() => handleSelectMental(option)}>
+                  {option}
+                </Option>
+              ))}
+            </>
+          )}
+
+          {step === 4.1 && (
+            <>
+              <Question text="Please specify your mental state" />
+              <input
+                type="text"
+                value={otherQ41}
+                onChange={(e) => setOtherQ41(e.target.value)}
+                className="my-2 border border-gray-400 rounded p-2 w-full outline-none focus:outline-none"
+                placeholder="Type here..."
+              />
+              <Option onClick={handleOtherQ41Submit}>Submit</Option>
+            </>
+          )}
+
+          {step === 5 && (
+            <>
+              <Question text="Have you noticed any changes in your energy levels lately?" />
+              {(
+                [
+                  "Yes, I feel more energetic",
+                  "Yes, I feel less energetic",
+                  "No significant change",
+                ] as Energy[]
+              ).map((option) => (
+                <Option key={option} onClick={() => handleSelectEnergy(option)}>
+                  {option}
+                </Option>
+              ))}
+            </>
+          )}
+
+          {step === 6 && (
+            <>
+              <Question text="How has your sleep been?" />
+              {(
+                [
+                  "Regular and restful",
+                  "Difficulty falling asleep",
+                  "Waking up frequently during the night",
+                  "Feeling tired after waking up",
+                  "Other",
+                ] as Sleep[]
+              ).map((option) => (
+                <Option key={option} onClick={() => handleSelectSleep(option)}>
+                  {option}
+                </Option>
+              ))}
+            </>
+          )}
+
+          {step === 6.1 && (
+            <>
+              <Question text="Please specify your sleep state" />
+              <input
+                type="text"
+                value={otherQ61}
+                onChange={(e) => setOtherQ61(e.target.value)}
+                className="my-2 border border-gray-400 rounded p-2 w-full outline-none focus:outline-none"
+                placeholder="Type here..."
+              />
+              <Option onClick={handleOtherQ61Submit}>Submit</Option>
+            </>
+          )}
+
+          {step === 7 && (
+            <>
+              <Question text="Have there been any significant changes in your diet or appetite?" />
+              {(
+                [
+                  "Eating more than usual",
+                  "Eating less than usual",
+                  "Cravings for specific foods",
+                  "Changes in appetite but not in eating habits",
+                  "No significant changes",
+                ] as Diet[]
+              ).map((option) => (
+                <Option key={option} onClick={() => handleSelectDiet(option)}>
+                  {option}
+                </Option>
+              ))}
+            </>
+          )}
+
+          {step === 7.1 && (
+            <>
+              <Question text="What type of foods have you been craving" />
+              {(
+                [
+                  "Sweet",
+                  "Salty",
+                  "Bitter",
+                  "Sour",
+                  "Pungent",
+                  "Other",
+                ] as Food[]
+              ).map((option) => (
+                <Option key={option} onClick={() => handleSelectFood(option)}>
+                  {option}
+                </Option>
+              ))}
+            </>
+          )}
+
+          {step === 7.11 && (
+            <>
+              <Question text="Please specify the food have you been craving?" />
+              <input
+                type="text"
+                value={otherQ711}
+                onChange={(e) => setOtherQ711(e.target.value)}
+                className="my-2 border border-gray-400 rounded p-2 w-full outline-none focus:outline-none"
+                placeholder="Type here..."
+              />
+              <Option onClick={handleOtherQ711Submit}>Submit</Option>
+            </>
+          )}
+
+          {step === 8 && (
+            <>
+              <Question text="Do you take any medications regularly?" />
+              {(["Yes", "No", "Prefer not to say"] as Medications[]).map(
+                (option) => (
+                  <Option
+                    key={option}
+                    onClick={() => handleSelectMedications(option)}
+                  >
+                    {option}
+                  </Option>
+                )
+              )}
+            </>
+          )}
+
+          {step === 8.1 && (
+            <>
+              <Question text="Please specify which medications you take" />
+              <input
+                type="text"
+                value={otherQ81}
+                onChange={(e) => setOtherQ81(e.target.value)}
+                className="my-2 border border-gray-400 rounded p-2 w-full outline-none focus:outline-none"
+                placeholder="Type here..."
+              />
+              <Option onClick={handleOtherQ81Submit}>Submit</Option>
+            </>
+          )}
+
+          {step === 9 && (
+            <>
+              <Question
+                text="As we approach the final step, it's important we consider all aspects of your well-being.
 Are there any other health concerns or details you feel would be helpful for me to know?
 This can ensure that the herbal formula I recommend is perfectly attuned to your needs. Please share anything you think is relevant—no detail is too small."
-            />
-            {["Yes, there's more to share about my health", "No"].map(
-              (option) => (
-                <Option
-                  key={option}
-                  onClick={() => handleFinalQuestion(option)}
-                >
-                  {option}
-                </Option>
-              )
-            )}
-          </>
-        )}
+              />
+              {["Yes, there's more to share about my health", "No"].map(
+                (option) => (
+                  <Option
+                    key={option}
+                    onClick={() => handleFinalQuestion(option)}
+                  >
+                    {option}
+                  </Option>
+                )
+              )}
+            </>
+          )}
 
-        {step === 9.1 && (
-          <>
-            <Question text="What additional information would be helpful for me to know?" />
-            <input
-              type="text"
-              value={otherFinal}
-              onChange={(e) => setOtherFinal(e.target.value)}
-              className="my-2 border border-gray-400 rounded p-2 w-full outline-none focus:outline-none"
-              placeholder="Type here..."
-            />
-            <Option onClick={handleOtherFinalSubmit}>Submit</Option>
-          </>
-        )}
+          {step === 9.1 && (
+            <>
+              <Question text="What additional information would be helpful for me to know?" />
+              <input
+                type="text"
+                value={otherFinal}
+                onChange={(e) => setOtherFinal(e.target.value)}
+                className="my-2 border border-gray-400 rounded p-2 w-full outline-none focus:outline-none"
+                placeholder="Type here..."
+              />
+              <Option onClick={handleOtherFinalSubmit}>Submit</Option>
+            </>
+          )}
 
-        {step === 10 && (
-          <>
-            <Question text="Thank you for sharing your details with me! I'm now thoughtfully analyzing the information you've provided to craft a herbal recommendation that’s just right for you. This process is a bit like brewing a soothing tea—it takes a short while, but the result is worth the wait. I’ll be ready with your personalized wellness blend in just a moment." />
-            <div className="text-center mt-12">
-              <div role="status">
-                <svg
-                  aria-hidden="true"
-                  className="inline w-16 h-16 text-gray-200 animate-spin dark:text-gray-600 fill-green"
-                  viewBox="0 0 100 101"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z"
-                    fill="currentColor"
-                  />
-                  <path
-                    d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z"
-                    fill="currentFill"
-                  />
-                </svg>
-                <span className="sr-only">Loading...</span>
+          {step === 10 && (
+            <>
+              <Question text="Thank you for sharing your details with me! I'm now thoughtfully analyzing the information you've provided to craft a herbal recommendation that’s just right for you. This process is a bit like brewing a soothing tea—it takes a short while, but the result is worth the wait. I’ll be ready with your personalized wellness blend in just a moment." />
+              <div className="text-center mt-12">
+                <div role="status">
+                  <svg
+                    aria-hidden="true"
+                    className="inline w-16 h-16 text-gray-200 animate-spin dark:text-gray-600 fill-green"
+                    viewBox="0 0 100 101"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z"
+                      fill="currentColor"
+                    />
+                    <path
+                      d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z"
+                      fill="currentFill"
+                    />
+                  </svg>
+                  <span className="sr-only">Loading...</span>
+                </div>
               </div>
-            </div>
-          </>
-        )}
-      </div>
+            </>
+          )}
+        </div>
+      )}
 
       {(step === 0 || step === 11) && (
         <>
-          <div className="flex-1 overflow-y-auto px-2 py-2" ref={messagesEndRef}>
+          <div
+            className="flex-1 overflow-y-auto px-2 py-2"
+            ref={messagesEndRef}
+          >
             {messages.map((message, idx) => {
               if (message.role === "assistant") {
                 return null; // Renders nothing for "assistant" role
@@ -1876,8 +1895,8 @@ This can ensure that the herbal formula I recommend is perfectly attuned to your
               />
             </label>
             <textarea
-              className="flex-1 border-solid border border-gray-600 rounded-md p-2 bg-gray-200 text-gray-800 outline-none focus:outline-none"
-              placeholder="Type your message here..."
+              className="text-sm flex-1 border-solid border border-gray-600 rounded-md p-2 bg-gray-200 text-gray-800 outline-none focus:outline-none"
+              placeholder="Type here..."
               rows={1}
               value={message}
               onChange={handleMessageChange}
