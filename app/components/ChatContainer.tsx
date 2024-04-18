@@ -762,16 +762,6 @@ Eager for personalized health advice? Upload your Tongue Selfie now—It’s sim
 
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
 
-  // const scrollToBottom = () => {
-  //   messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  // };
-
-  // useEffect(() => {
-  //   scrollToBottom();
-  // }, [messages]);
-
-  // const messagesContainerRef = useRef(null); // Add this line
-
   const scrollToBottom = () => {
     if (messagesEndRef.current) {
       const scrollHeight = messagesEndRef.current.scrollHeight;
@@ -886,9 +876,8 @@ Eager for personalized health advice? Upload your Tongue Selfie now—It’s sim
         setFirstImg(urls);
 
         try {
-          console.log("executing");
-          if (firstImgCounter) {
-            console.log("hey fool");
+          console.log(firstImgCounter); //testing kr rha pta nhi maine yeh keon likha tha
+          if (!firstImgCounter) {
             if (images.length === 0) {
               const textContentItem = payload.messages[0].content.find(
                 (item) => item.type === "text"
@@ -926,6 +915,7 @@ Eager for personalized health advice? Upload your Tongue Selfie now—It’s sim
                   role: "system",
                   content: [{ type: "text", text: finalRes }],
                 };
+                console.log(newMessage);
 
                 setMessages((prevMessages: Message[]) => [
                   ...prevMessages,
@@ -1025,13 +1015,13 @@ Eager for personalized health advice? Upload your Tongue Selfie now—It’s sim
                     {
                       type: "text",
                       text:
-                        "Analyze image and tell any possible disease along with recommended products to use. User health data is below: " +
+                        "In above messages user tongue disease is present. Try to recommended all the products to use according to the disease diagnosed. User health data is below: " +
                         textMessage,
                     },
-                    {
-                      type: "image_url",
-                      image_url: { url: firstImg[0] },
-                    },
+                    // {
+                    //   type: "image_url",
+                    //   image_url: { url: firstImg[0] },
+                    // },
                   ],
                 },
               ],
@@ -1072,6 +1062,60 @@ Eager for personalized health advice? Upload your Tongue Selfie now—It’s sim
           alt="Avatar"
         />
         <h2 className="text-white text-lg">Ask Inteliflora</h2>
+      </div>
+
+      <div className="flex-1 overflow-y-auto px-2 py-2" ref={messagesEndRef}>
+        {messages.map((message, idx) => {
+          if (message.role === "assistant") {
+            return null; // Renders nothing for "assistant" role
+          }
+          return (
+            <div
+              key={idx}
+              className={`flex mb-4 ${
+                message.role === "user" ? "justify-end" : "justify-start"
+              }`}
+            >
+              <div
+                className={`rounded-md p-2 max-w-xs md:max-w-xl ${
+                  message.role === "user"
+                    ? "bg-green text-white"
+                    : "bg-gray-200 text-black"
+                }`}
+              >
+                {/* Ensure that content is an array before mapping */}
+                {Array.isArray(message.content) ? (
+                  message.content.map((content, index) => {
+                    if (content.type === "text") {
+                      return (
+                        <pre
+                          key={index}
+                          dangerouslySetInnerHTML={{
+                            __html: formatMessage(content.text),
+                          }}
+                          className="text-sm"
+                        />
+                      );
+                    } else if (content.type === "image_url") {
+                      return (
+                        <img
+                          key={index}
+                          src={content.image_url.url}
+                          alt={`Uploaded by ${message.role}`}
+                          className="h-16 w-16 object-cover rounded-lg"
+                        />
+                      );
+                    }
+                  })
+                ) : (
+                  // If message.content is not an array, render it as a string
+                  <p className="text-sm">{message.content}</p>
+                )}
+              </div>
+            </div>
+          );
+        })}
+        {/* <div ref={messagesEndRef} /> */}
       </div>
 
       {!(step === 0 || step === 11) && (
@@ -1807,63 +1851,6 @@ This can ensure that the herbal formula I recommend is perfectly attuned to your
 
       {(step === 0 || step === 11) && (
         <>
-          <div
-            className="flex-1 overflow-y-auto px-2 py-2"
-            ref={messagesEndRef}
-          >
-            {messages.map((message, idx) => {
-              if (message.role === "assistant") {
-                return null; // Renders nothing for "assistant" role
-              }
-              return (
-                <div
-                  key={idx}
-                  className={`flex mb-4 ${
-                    message.role === "user" ? "justify-end" : "justify-start"
-                  }`}
-                >
-                  <div
-                    className={`rounded-md p-2 max-w-xs md:max-w-xl ${
-                      message.role === "user"
-                        ? "bg-green text-white"
-                        : "bg-gray-200 text-black"
-                    }`}
-                  >
-                    {/* Ensure that content is an array before mapping */}
-                    {Array.isArray(message.content) ? (
-                      message.content.map((content, index) => {
-                        if (content.type === "text") {
-                          return (
-                            <pre
-                              key={index}
-                              dangerouslySetInnerHTML={{
-                                __html: formatMessage(content.text),
-                              }}
-                              className="text-sm"
-                            />
-                          );
-                        } else if (content.type === "image_url") {
-                          return (
-                            <img
-                              key={index}
-                              src={content.image_url.url}
-                              alt={`Uploaded by ${message.role}`}
-                              className="h-16 w-16 object-cover rounded-lg"
-                            />
-                          );
-                        }
-                      })
-                    ) : (
-                      // If message.content is not an array, render it as a string
-                      <p className="text-sm">{message.content}</p>
-                    )}
-                  </div>
-                </div>
-              );
-            })}
-            {/* <div ref={messagesEndRef} /> */}
-          </div>
-
           <div className="p-4">
             {images.length > 0 && (
               <div className="relative inline-block">
