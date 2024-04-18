@@ -877,7 +877,7 @@ Eager for personalized health advice? Upload your Tongue Selfie now—It’s sim
 
         try {
           console.log(firstImgCounter); //testing kr rha pta nhi maine yeh keon likha tha
-          if (!firstImgCounter) {
+          // if (!firstImgCounter) {
             if (images.length === 0) {
               const textContentItem = payload.messages[0].content.find(
                 (item) => item.type === "text"
@@ -962,7 +962,7 @@ Eager for personalized health advice? Upload your Tongue Selfie now—It’s sim
                 newMessage as Message,
               ]); // Type assertion here
             }
-          }
+          // }
         } catch (error) {
           console.log(error);
           toast.error("Failed to send message");
