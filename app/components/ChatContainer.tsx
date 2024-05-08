@@ -475,7 +475,7 @@ function ChatContainer() {
       },
     ]);
     setBl(bl);
-    setStep(1.161);
+    setStep(1.162);
   };
 
   const handleSelectBs = (bs: BackSevere) => {
