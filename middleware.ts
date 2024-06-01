@@ -5,7 +5,7 @@ export function middleware(req: NextRequest) {
   // Set custom headers or perform other middleware logic here
   response.headers.set(
     "Content-Security-Policy",
-    "frame-ancestors 'self' https://inteliflora.com/"
+    "frame-ancestors 'self' https://myherbaladvisor.com/"
   );
   return response;
 }
